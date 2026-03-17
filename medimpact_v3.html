@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Med Impact — Hip Dysplasia Care Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F6F8FA;color:#1a1a1a;min-height:100vh}
+:root{--green:#1D9E75;--green-light:#E1F5EE;--green-dark:#0F6E56;--blue:#378ADD;--blue-light:#E6F1FB;--amber-light:#FAEEDA;--amber-dark:#633806;--border:#e0e4ea;--muted:#6b7280;--radius:10px;--radius-lg:14px}
+
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0fdf8 0%,#e6f1fb 100%);padding:1rem}
+.auth-card{background:#fff;border-radius:20px;padding:2.5rem;width:100%;max-width:420px;box-shadow:0 4px 40px rgba(0,0,0,0.08);border:1px solid var(--border)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem;justify-content:center}
+.auth-logo-icon{width:40px;height:40px;border-radius:10px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.auth-logo span{font-size:20px;font-weight:700}
+.auth-tabs{display:flex;background:#f3f4f6;border-radius:8px;padding:3px;margin-bottom:1.5rem}
+.auth-tab{flex:1;padding:8px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;background:transparent;color:var(--muted);transition:all 0.15s}
+.auth-tab.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.auth-field{margin-bottom:1rem}
+.auth-field label{display:block;font-size:13px;font-weight:500;margin-bottom:5px;color:#374151}
+.auth-field input,.auth-field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:border 0.15s;font-family:inherit;background:#fff}
+.auth-field input:focus,.auth-field select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.btn-primary{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s;font-family:inherit}
+.btn-primary:hover{background:var(--green-dark)}
+.auth-note{text-align:center;font-size:12px;color:var(--muted);margin-top:1rem;line-height:1.5}
+.auth-note a{color:var(--green);text-decoration:none;cursor:pointer}
+.auth-section{display:none}.auth-section.active{display:block}
+.auth-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bha-pill{font-size:11px;background:var(--green-light);color:#085041;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:4px}
+
+.app-wrap{display:none;min-height:100vh;background:#F6F8FA}
+.topbar{background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:200}
+.tb-logo{display:flex;align-items:center;gap:9px;padding:1rem 0;margin-right:1.5rem;flex-shrink:0}
+.tb-logo-icon{width:30px;height:30px;border-radius:8px;background:var(--green);display:flex;align-items:center;justify-content:center}
+.tb-logo span{font-size:16px;font-weight:700}
+.desktop-nav{display:flex;align-items:center}
+.nav-btn{padding:0 12px;height:56px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-family:inherit;white-space:nowrap}
+.nav-btn:hover{color:#1a1a1a}
+.nav-btn.active{color:var(--green);border-bottom-color:var(--green)}
+.user-chip{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.user-av{width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.logout-btn{padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit}
+.logout-btn:hover{background:#f3f4f6}
+
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:200;padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+.mob-nav-inner{display:flex;justify-content:space-around}
+.mob-nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;border:none;background:transparent;cursor:pointer;color:var(--muted);font-size:10px;font-family:inherit;font-weight:500;min-width:52px;border-radius:8px;transition:color 0.15s}
+.mob-nav-btn.active{color:var(--green)}
+
+.main{max-width:1040px;margin:0 auto;padding:2rem 1.5rem}
+.page{display:none}.page.active{display:block}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem}
+.metric{background:#f8fafc;border-radius:var(--radius);padding:1rem;text-align:center}
+.metric-val{font-size:24px;font-weight:700;color:var(--green)}
+.metric-lab{font-size:12px;color:var(--muted);margin-top:4px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:1.5rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.section-head{margin-bottom:1.25rem}
+.section-head h2{font-size:20px;font-weight:700;margin-bottom:4px}
+.section-head p{font-size:13px;color:var(--muted)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:var(--green-light);color:#085041}
+.badge-blue{background:var(--blue-light);color:#0C447C}
+.badge-amber{background:var(--amber-light);color:var(--amber-dark)}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all 0.15s}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:var(--green-dark)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:#1a1a1a}.btn-outline:hover{background:#f8fafc}
+.btn-link{background:transparent;border:none;color:var(--green);font-size:13px;cursor:pointer;font-weight:600;padding:0;font-family:inherit}
+label{font-size:13px;color:#374151;font-weight:500}
+input[type=text],input[type=email],select,textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;color:#1a1a1a;transition:border 0.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;margin-bottom:5px}
+input[type=range]{width:100%;accent-color:var(--green)}
+.log-entry{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:10px;display:flex;justify-content:space-between;align-items:start;gap:10px}
+.doctor-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:12px;display:flex;align-items:start;gap:14px;transition:box-shadow 0.15s}
+.doctor-card:hover{box-shadow:0 2px 16px rgba(0,0,0,0.07)}
+.doc-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.hero{background:linear-gradient(135deg,#f0fdf8 0%,#e8f4fd 100%);border-radius:20px;padding:3rem 2.5rem;margin-bottom:1.5rem;text-align:center;border:1px solid #d1f0e4}
+.hero h1{font-size:36px;font-weight:800;line-height:1.15;margin-bottom:0.75rem}
+.hero h1 span{color:var(--green)}
+.hero p{font-size:15px;color:var(--muted);max-width:520px;margin:0 auto 1.5rem;line-height:1.7}
+.hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.edu-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;cursor:pointer;transition:box-shadow 0.15s,transform 0.15s}
+.edu-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.08);transform:translateY(-2px)}
+.icon-box{width:38px;height:38px;border-radius:9px;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0}
+.stars{color:#f59e0b;font-size:12px}
+.hospital-tag{font-size:11px;color:var(--muted)}
+.search-bar{display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:160px}
+
+/* BACK BUTTON */
+.back-btn{display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);font-family:inherit;padding:0;margin-bottom:1.25rem;transition:color 0.15s}
+.back-btn:hover{color:var(--green)}
+
+/* DOCTOR PROFILE PAGE */
+.profile-header{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-bottom:1.25rem}
+.profile-av{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0}
+.stat-box{background:#f8fafc;border-radius:var(--radius);padding:1rem;text-align:center}
+.stat-val{font-size:20px;font-weight:700;color:var(--green)}
+.stat-lab{font-size:11px;color:var(--muted);margin-top:3px}
+.review-card{background:#f8fafc;border-radius:var(--radius);padding:1rem;margin-bottom:10px}
+.tag{display:inline-block;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:500;background:#f3f4f6;color:#374151;margin:3px 3px 3px 0}
+
+/* EDUCATION DETAIL PAGE */
+.edu-detail-hero{background:linear-gradient(135deg,#f0fdf8,#e8f4fd);border-radius:16px;padding:2rem;margin-bottom:1.5rem;border:1px solid #d1f0e4}
+.edu-section{margin-bottom:2rem}
+.edu-section h3{font-size:16px;font-weight:700;margin-bottom:0.75rem;color:#1a1a1a}
+.edu-section p{font-size:14px;color:#374151;line-height:1.75;margin-bottom:0.75rem}
+.edu-section ul{padding-left:1.25rem}
+.edu-section ul li{font-size:14px;color:#374151;line-height:1.75;margin-bottom:4px}
+.info-box{background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:1rem}
+.info-box p{font-size:13px;color:#085041;line-height:1.6}
+.warn-box{background:var(--amber-light);border-left:3px solid #BA7517;border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:1rem}
+.warn-box p{font-size:13px;color:var(--amber-dark);line-height:1.6}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 60px rgba(0,0,0,0.15)}
+.modal-header{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:start}
+.modal-body{padding:1.5rem}
+.modal-close{background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;padding:2px 6px;border-radius:6px}
+.modal-close:hover{background:#f3f4f6}
+.step-bar{display:flex;gap:0;margin-bottom:1.5rem}
+.step-item{flex:1;text-align:center;position:relative}
+.step-item::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:#e0e4ea;z-index:0}
+.step-item:last-child::after{display:none}
+.step-dot{width:28px;height:28px;border-radius:50%;background:#e0e4ea;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin:0 auto 6px;position:relative;z-index:1;transition:all 0.2s}
+.step-dot.done{background:var(--green);color:#fff}
+.step-dot.active{background:var(--green);color:#fff;box-shadow:0 0 0 4px var(--green-light)}
+.step-label{font-size:11px;color:var(--muted)}
+.step-label.active{color:var(--green);font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:1rem 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;border:none;background:transparent;transition:all 0.15s}
+.cal-day:hover:not(.disabled):not(.empty){background:var(--green-light);color:#085041}
+.cal-day.selected{background:var(--green);color:#fff}
+.cal-day.disabled{color:#d1d5db;cursor:default}
+.cal-day.empty{cursor:default}
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:0.75rem}
+.time-slot{padding:9px;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;text-align:center;font-family:inherit;background:#fff;transition:all 0.15s}
+.time-slot:hover{border-color:var(--green);color:var(--green)}
+.time-slot.selected{background:var(--green);color:#fff;border-color:var(--green)}
+.time-slot.unavailable{background:#f3f4f6;color:#d1d5db;cursor:default}
+.confirm-icon{width:64px;height:64px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.appt-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:10px;display:flex;gap:14px;align-items:center}
+.appt-date-box{background:var(--green-light);border-radius:10px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:52px}
+.appt-date-box .day{font-size:20px;font-weight:700;color:var(--green);line-height:1}
+.appt-date-box .mon{font-size:11px;color:#085041;font-weight:600;margin-top:2px}
+.visit-opt{border:1px solid var(--border);border-radius:10px;padding:1rem;cursor:pointer;transition:all 0.15s;margin-bottom:10px}
+.visit-opt:hover{border-color:var(--green)}
+
+/* DOCTOR HIDDEN FILTER ATTR */
+.doctor-card[data-hidden="true"]{display:none}
+
+@media(max-width:768px){
+  .topbar{padding:0 1rem}
+  .desktop-nav{display:none}
+  .user-chip span{display:none}
+  .mobile-nav{display:block}
+  .main{padding:1.25rem 1rem 5.5rem}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .grid-2{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr}
+  .hero{padding:2rem 1.25rem;border-radius:14px}
+  .hero h1{font-size:26px}
+  .doctor-card{flex-direction:column;gap:10px}
+  .search-bar{flex-direction:column}
+  .search-bar select{width:100%}
+  .auth-row{grid-template-columns:1fr}
+  .auth-card{padding:1.75rem 1.25rem}
+  .time-grid{grid-template-columns:repeat(2,1fr)}
+  .step-label{display:none}
+  .appt-card{flex-direction:column;align-items:start}
+  .profile-header .grid-4{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="7" r="4.5" fill="white" opacity="0.95"/><path d="M3 21c0-4.42 3.58-8 8-8s8 3.58 8 8" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+      <span>Med Impact</span><span class="bha-pill">BHA 2026</span>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuth('login')">Sign in</button>
+      <button class="auth-tab" onclick="switchAuth('signup')">Create account</button>
+    </div>
+    <div class="auth-section active" id="auth-login">
+      <div class="auth-field"><label>Email address</label><input type="email" placeholder="you@example.com" id="login-email"/></div>
+      <div class="auth-field"><label>Password</label><input type="password" placeholder="••••••••"/></div>
+      <div style="text-align:right;margin-bottom:1rem"><a style="font-size:12px;color:var(--green);cursor:pointer">Forgot password?</a></div>
+      <button class="btn-primary" onclick="doLogin()">Sign in to Med Impact</button>
+      <div class="auth-note">Demo: use any email &amp; password to continue</div>
+      <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px">
+        <a onclick="showLegal('tos')" style="display:block;text-align:center;font-size:13px;color:var(--green);cursor:pointer;font-weight:500;text-decoration:none;padding:8px;border:1px solid var(--border);border-radius:8px;transition:background 0.15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">Click here to access Terms of Service</a>
+        <a onclick="showLegal('privacy')" style="display:block;text-align:center;font-size:13px;color:var(--green);cursor:pointer;font-weight:500;text-decoration:none;padding:8px;border:1px solid var(--border);border-radius:8px;transition:background 0.15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">Click here to access Privacy Policy</a>
+      </div>
+    </div>
+    <div class="auth-section" id="auth-signup">
+      <div class="auth-row">
+        <div class="auth-field"><label>First name</label><input type="text" placeholder="Alex" id="su-first"/></div>
+        <div class="auth-field"><label>Last name</label><input type="text" placeholder="Johnson" id="su-last"/></div>
+      </div>
+      <div class="auth-field"><label>Email address</label><input type="email" placeholder="you@example.com"/></div>
+      <div class="auth-field"><label>I am a...</label><select><option>Patient with hip dysplasia</option><option>Parent / carer</option><option>Healthcare professional</option><option>Researcher</option></select></div>
+      <div class="auth-field"><label>Password</label><input type="password" placeholder="Min. 8 characters"/></div>
+      <div class="auth-field"><label>Date of diagnosis (optional)</label><input type="text" placeholder="e.g. March 2021"/></div>
+      <button class="btn-primary" onclick="doSignup()">Create my account</button>
+      <div class="auth-note">By signing up you agree to our <a>Terms of Service</a> and <a>Privacy Policy</a>.<br/>Your data is anonymized before any research use.</div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGAL OVERLAY -->
+<div id="legalOverlay" style="display:none;position:fixed;inset:0;background:#F6F8FA;z-index:9999;overflow-y:auto">
+  <div style="background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;gap:10px;height:56px;position:sticky;top:0">
+    <div style="width:28px;height:28px;border-radius:7px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="3" fill="white" opacity="0.9"/><path d="M2 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></div>
+    <span style="font-size:15px;font-weight:700">Med Impact</span>
+    <span class="bha-pill">BHA 2026</span>
+    <button onclick="closeLegal()" style="margin-left:auto;background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;color:#1a1a1a;font-family:inherit">← Back to sign in</button>
+  </div>
+  <div style="max-width:800px;margin:0 auto;padding:3rem 2rem" id="legalContent"></div>
+  <div style="background:#fff;border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center">
+    <p style="font-size:12px;color:var(--muted)">© 2026 Med Impact · BHA Competition 2026 · Texas, USA</p>
+    <button onclick="closeLegal()" style="margin-top:0.75rem;background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">← Back to sign in</button>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div><div style="font-size:16px;font-weight:700" id="modal-doc-name">Book appointment</div><div style="font-size:12px;color:var(--muted);margin-top:2px" id="modal-doc-sub"></div></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="step-bar">
+        <div class="step-item"><div class="step-dot active" id="sd1">1</div><div class="step-label active">Type</div></div>
+        <div class="step-item"><div class="step-dot" id="sd2">2</div><div class="step-label">Date</div></div>
+        <div class="step-item"><div class="step-dot" id="sd3">3</div><div class="step-label">Time</div></div>
+        <div class="step-item"><div class="step-dot" id="sd4">4</div><div class="step-label">Confirm</div></div>
+      </div>
+      <div id="book-step1">
+        <div style="font-size:14px;font-weight:600;margin-bottom:1rem">What type of visit do you need?</div>
+        <div class="visit-opt" onclick="selectVisit(this,'New patient consultation','60 min · In-person')"><div style="font-size:14px;font-weight:600">New patient consultation</div><div style="font-size:12px;color:var(--muted);margin-top:2px">60 min · In-person</div></div>
+        <div class="visit-opt" onclick="selectVisit(this,'Follow-up appointment','30 min · In-person or telehealth')"><div style="font-size:14px;font-weight:600">Follow-up appointment</div><div style="font-size:12px;color:var(--muted);margin-top:2px">30 min · In-person or telehealth</div></div>
+        <div class="visit-opt" onclick="selectVisit(this,'Telehealth video call','20 min · Video')"><div style="font-size:14px;font-weight:600">Telehealth video call</div><div style="font-size:12px;color:var(--muted);margin-top:2px">20 min · Video</div></div>
+        <div class="visit-opt" onclick="selectVisit(this,'Pre-surgery consultation','45 min · In-person')"><div style="font-size:14px;font-weight:600">Pre-surgery consultation</div><div style="font-size:12px;color:var(--muted);margin-top:2px">45 min · In-person</div></div>
+        <div style="margin-top:0.5rem;display:flex;justify-content:flex-end"><button class="btn btn-green" onclick="goStep(2)" id="btn-step1" disabled style="opacity:0.5">Continue →</button></div>
+      </div>
+      <div id="book-step2" style="display:none">
+        <div style="font-size:14px;font-weight:600;margin-bottom:1rem">Choose a date</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+          <button class="btn btn-outline" style="padding:6px 12px;font-size:13px" onclick="changeMonth(-1)">‹ Prev</button>
+          <div style="font-size:14px;font-weight:600" id="cal-title">April 2026</div>
+          <button class="btn btn-outline" style="padding:6px 12px;font-size:13px" onclick="changeMonth(1)">Next ›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px">
+          <div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600">Su</div><div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600">Mo</div><div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600">Tu</div><div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600">We</div><div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600">Th</div><div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600">Fr</div><div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600">Sa</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+          <div style="width:28px;height:28px;border-radius:8px;background:#f3f4f6;flex-shrink:0"></div>
+          <span style="font-size:12px;color:var(--muted)">Grey dates are unavailable for appointments</span>
+        </div>
+        <div style="margin-top:1.25rem;display:flex;justify-content:space-between">
+          <button class="btn btn-outline" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-green" onclick="goStep(3)" id="btn-step2" disabled style="opacity:0.5">Continue →</button>
+        </div>
+      </div>
+      <div id="book-step3" style="display:none">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Choose a time</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:1rem" id="step3-date-label"></div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:#374151">Morning</div>
+        <div class="time-grid">
+          <button class="time-slot" onclick="selectTime(this,'8:00 AM')">8:00 AM</button>
+          <button class="time-slot" onclick="selectTime(this,'8:30 AM')">8:30 AM</button>
+          <button class="time-slot unavailable">9:00 AM</button>
+          <button class="time-slot" onclick="selectTime(this,'9:30 AM')">9:30 AM</button>
+          <button class="time-slot unavailable">10:00 AM</button>
+          <button class="time-slot" onclick="selectTime(this,'10:30 AM')">10:30 AM</button>
+          <button class="time-slot" onclick="selectTime(this,'11:00 AM')">11:00 AM</button>
+          <button class="time-slot unavailable">11:30 AM</button>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin:1rem 0 8px;color:#374151">Afternoon</div>
+        <div class="time-grid">
+          <button class="time-slot unavailable">1:00 PM</button>
+          <button class="time-slot" onclick="selectTime(this,'1:30 PM')">1:30 PM</button>
+          <button class="time-slot" onclick="selectTime(this,'2:00 PM')">2:00 PM</button>
+          <button class="time-slot unavailable">2:30 PM</button>
+          <button class="time-slot" onclick="selectTime(this,'3:00 PM')">3:00 PM</button>
+          <button class="time-slot" onclick="selectTime(this,'3:30 PM')">3:30 PM</button>
+          <button class="time-slot unavailable">4:00 PM</button>
+          <button class="time-slot" onclick="selectTime(this,'4:30 PM')">4:30 PM</button>
+        </div>
+        <div style="margin-top:1.25rem;display:flex;justify-content:space-between">
+          <button class="btn btn-outline" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-green" onclick="goStep(4)" id="btn-step3" disabled style="opacity:0.5">Continue →</button>
+        </div>
+      </div>
+      <div id="book-step4" style="display:none">
+        <div style="font-size:14px;font-weight:600;margin-bottom:1rem">Confirm your booking</div>
+        <div class="card" style="margin-bottom:1rem">
+          <table style="width:100%;font-size:13px;border-collapse:collapse">
+            <tr><td style="color:var(--muted);padding:6px 0">Specialist</td><td style="font-weight:600;text-align:right" id="conf-doc"></td></tr>
+            <tr><td style="color:var(--muted);padding:6px 0">Visit type</td><td style="text-align:right" id="conf-type"></td></tr>
+            <tr><td style="color:var(--muted);padding:6px 0">Date</td><td style="text-align:right" id="conf-date"></td></tr>
+            <tr><td style="color:var(--muted);padding:6px 0">Time</td><td style="text-align:right" id="conf-time"></td></tr>
+          </table>
+        </div>
+        <div class="form-group"><label style="display:block;margin-bottom:5px">Reason for visit (optional)</label><textarea placeholder="Briefly describe your symptoms or concerns..." style="resize:none;height:72px"></textarea></div>
+        <div class="form-group"><label style="display:block;margin-bottom:5px">Insurance provider</label><select><option>Uninsured / Self-pay</option><option>Blue Cross Blue Shield TX</option><option>UnitedHealthcare</option><option>Aetna</option><option>Cigna</option><option>Medicaid Texas</option><option>Medicare</option><option>Humana</option></select></div>
+        <div style="margin-top:1.25rem;display:flex;justify-content:space-between">
+          <button class="btn btn-outline" onclick="goStep(3)">← Back</button>
+          <button class="btn btn-green" onclick="confirmBooking()">Confirm booking</button>
+        </div>
+      </div>
+      <div id="book-step5" style="display:none;text-align:center;padding:1rem 0">
+        <div class="confirm-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M8 14.5l4 4 8-9" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:6px">Appointment confirmed!</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6" id="conf-success-msg"></div>
+        <div style="background:#f8fafc;border-radius:10px;padding:1rem;text-align:left;margin-bottom:1.5rem"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">A confirmation has been sent to your email</div><div style="font-size:13px;font-weight:600">📅 Add to calendar</div></div>
+        <button class="btn btn-green" style="width:100%" onclick="closeModal();showPage('appointments',null,'mob-appointments')">View my appointments</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app-wrap" id="appWrap">
+  <div class="topbar">
+    <div class="tb-logo">
+      <div class="tb-logo-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" fill="white" opacity="0.95"/><path d="M2 15c0-3.31 2.69-6 6-6s6 2.69 6 6" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></div>
+      <span>Med Impact</span><span class="bha-pill">BHA 2026</span>
+    </div>
+    <div class="desktop-nav">
+      <button class="nav-btn active" onclick="showPage('home',this)">Home</button>
+      <button class="nav-btn" onclick="showPage('tracker',this)">Track symptoms</button>
+      <button class="nav-btn" onclick="showPage('diagnosis',this)">Diagnosis</button>
+      <button class="nav-btn" onclick="showPage('treatment',this)">Treatment plan</button>
+      <button class="nav-btn" onclick="showPage('education',this)">Learn</button>
+      <button class="nav-btn" onclick="showPage('doctors',this)">Find care</button>
+      <button class="nav-btn" id="nav-appts" onclick="showPage('appointments',this)">Appointments</button>
+      <button class="nav-btn" onclick="showPage('research',this)">Research</button>
+    </div>
+    <div class="user-chip">
+      <div class="user-av" id="user-av">AJ</div>
+      <span id="user-name" style="font-size:13px;font-weight:500">Alex J.</span>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="mobile-nav">
+    <div class="mob-nav-inner">
+      <button class="mob-nav-btn active" id="mob-home" onclick="showPage('home',null,'mob-home')">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 9.5L11 3l8 6.5V19a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/><path d="M8 20v-7h6v7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Home
+      </button>
+      <button class="mob-nav-btn" id="mob-tracker" onclick="showPage('tracker',null,'mob-tracker')">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M7 11l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Track
+      </button>
+      <button class="mob-nav-btn" id="mob-diagnosis" onclick="showPage('diagnosis',null,'mob-diagnosis')">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M11 7v4l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Diagnose
+      </button>
+      <button class="mob-nav-btn" id="mob-treatment" onclick="showPage('treatment',null,'mob-treatment')">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M9 3h4v4h4v4h-4v4H9v-4H5V7h4V3z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/></svg>
+        Treatment
+      </button>
+      <button class="mob-nav-btn" id="mob-doctors" onclick="showPage('doctors',null,'mob-doctors')">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="4" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M4 19c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+        Find care
+      </button>
+      <button class="mob-nav-btn" id="mob-appointments" onclick="showPage('appointments',null,'mob-appointments')">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M7 3v4M15 3v4M3 10h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Appts
+      </button>
+      <button class="mob-nav-btn" id="mob-research" onclick="showPage('research',null,'mob-research')">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 17l5-5 3 3 5-6 3 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Research
+      </button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="hero">
+        <div class="badge badge-green" style="margin-bottom:1rem">Texas Hip Dysplasia Network · BHA Competition 2026</div>
+        <h1>Hip dysplasia care,<br/><span>reimagined for Texas</span></h1>
+        <p>Med Impact connects patients across Texas with top orthopedic specialists, evidence-based education, and a community driving real research outcomes.</p>
+        <div class="hero-btns">
+          <button class="btn btn-green" style="padding:11px 22px;font-size:14px" onclick="showPage('tracker',null,'mob-tracker')">Start tracking</button>
+          <button class="btn btn-outline" style="padding:11px 22px;font-size:14px" onclick="showPage('education',null)">Learn about HD</button>
+        </div>
+      </div>
+      <div class="grid-4">
+        <div class="metric"><div class="metric-val">1 in 20</div><div class="metric-lab">people affected by HD</div></div>
+        <div class="metric"><div class="metric-val">73%</div><div class="metric-lab">undiagnosed in Texas</div></div>
+        <div class="metric"><div class="metric-val">12 yrs</div><div class="metric-lab">avg time to diagnosis</div></div>
+        <div class="metric"><div class="metric-val">2.1M</div><div class="metric-lab">TX patients estimated</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="icon-box"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="2" rx="1" fill="#1D9E75"/><rect x="2" y="6" width="10" height="2" rx="1" fill="#1D9E75"/><rect x="2" y="10" width="12" height="2" rx="1" fill="#1D9E75"/><rect x="2" y="14" width="7" height="2" rx="1" fill="#1D9E75"/></svg></div><div style="font-size:15px;font-weight:600;margin-bottom:5px">Symptom tracking</div><p style="font-size:13px;color:var(--muted);line-height:1.6">Log pain, mobility, and flare-ups daily. Share visual reports directly with your specialist at your next appointment.</p></div>
+        <div class="card"><div class="icon-box"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3.5" stroke="#1D9E75" stroke-width="1.5" fill="none"/><path d="M3 16c0-3.31 2.69-6 6-6s6 2.69 6 6" stroke="#1D9E75" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div style="font-size:15px;font-weight:600;margin-bottom:5px">Texas specialist network</div><p style="font-size:13px;color:var(--muted);line-height:1.6">Access orthopedic specialists at UT Southwestern, Houston Methodist, Texas Children's, Baylor and more.</p></div>
+        <div class="card"><div class="icon-box"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2L2 6v6l7 4 7-4V6L9 2z" stroke="#1D9E75" stroke-width="1.5" fill="none"/><path d="M9 2v10M2 6l7 4 7-4" stroke="#1D9E75" stroke-width="1.5" fill="none"/></svg></div><div style="font-size:15px;font-weight:600;margin-bottom:5px">Education hub</div><p style="font-size:13px;color:var(--muted);line-height:1.6">From DDH in newborns to PAO surgery and recovery — evidence-based guides written for patients, not textbooks.</p></div>
+        <div class="card"><div class="icon-box"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="4" width="12" height="13" rx="2" stroke="#1D9E75" stroke-width="1.5" fill="none"/><path d="M6 2v4M12 2v4M3 9h12" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/></svg></div><div style="font-size:15px;font-weight:600;margin-bottom:5px">Book appointments</div><p style="font-size:13px;color:var(--muted);line-height:1.6">Schedule visits with Texas HD specialists in seconds. Get reminders and manage all your appointments in one place.</p></div>
+      </div>
+    </div>
+
+    <!-- TRACKER -->
+    <div class="page" id="page-tracker">
+      <div class="section-head"><h2>Symptom tracker</h2><p>Log your daily symptoms to track trends and share with your care team</p></div>
+      <div class="grid-2" style="align-items:start">
+        <div class="card">
+          <div style="font-size:15px;font-weight:600;margin-bottom:1.25rem">Log a new entry</div>
+          <div class="form-group">
+            <label>Pain level: <span id="pain-val" style="color:var(--green);font-weight:700">5</span>/10</label>
+            <input type="range" min="1" max="10" value="5" step="1" style="width:100%;margin-top:8px" oninput="document.getElementById('pain-val').textContent=this.value"/>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px"><span>No pain</span><span>Moderate</span><span>Severe</span></div>
+          </div>
+          <div class="form-group"><label style="display:block;margin-bottom:5px">Affected side</label><select id="t-side"><option>Left hip</option><option>Right hip</option><option>Both hips</option></select></div>
+          <div class="form-group"><label style="display:block;margin-bottom:5px">Mobility today</label><select id="t-mob"><option>Normal — no restrictions</option><option>Mild — slight limp or stiffness</option><option>Moderate — difficulty with stairs</option><option>Severe — limited basic movement</option></select></div>
+          <div class="form-group"><label style="display:block;margin-bottom:5px">Notes (optional)</label><textarea id="t-notes" placeholder="Triggers, medications, activities, weather..." style="resize:none;height:72px"></textarea></div>
+          <button class="btn btn-green" style="width:100%;padding:11px" onclick="logEntry()">Save entry</button>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:1rem">Recent entries</div>
+          <div id="log-list">
+            <div class="log-entry"><div><div style="font-size:11px;color:var(--muted)">Today, 8:30am</div><div style="font-size:14px;font-weight:600;margin:4px 0">Pain: 4/10 · Left hip</div><div style="font-size:12px;color:var(--muted)">Mild — slight limp or stiffness</div></div><span class="badge badge-green">4</span></div>
+            <div class="log-entry"><div><div style="font-size:11px;color:var(--muted)">Yesterday, 7:15pm</div><div style="font-size:14px;font-weight:600;margin:4px 0">Pain: 7/10 · Both hips</div><div style="font-size:12px;color:var(--muted)">Moderate — difficulty with stairs</div><div style="font-size:12px;color:var(--muted);margin-top:3px">Walked 3 miles, cold weather</div></div><span class="badge badge-amber">7</span></div>
+            <div class="log-entry"><div><div style="font-size:11px;color:var(--muted)">2 days ago, 9:00am</div><div style="font-size:14px;font-weight:600;margin:4px 0">Pain: 2/10 · Right hip</div><div style="font-size:12px;color:var(--muted)">Normal — no restrictions</div><div style="font-size:12px;color:var(--muted);margin-top:3px">Great day after physio session</div></div><span class="badge badge-green">2</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDUCATION LIST -->
+    <div class="page" id="page-education">
+      <div class="section-head"><h2>Education hub</h2><p>Click any topic to read the full evidence-based guide</p></div>
+      <div class="grid-3">
+        <div class="edu-card" onclick="showEduGuide('what')"><div class="badge badge-green" style="margin-bottom:8px">Basics</div><div style="font-size:14px;font-weight:600;margin-bottom:5px">What is hip dysplasia?</div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px">Hip dysplasia occurs when the hip socket doesn't fully cover the femoral head, causing instability and long-term joint damage if untreated.</p><span class="btn-link">Read guide →</span></div>
+        <div class="edu-card" onclick="showEduGuide('treatment')"><div class="badge badge-blue" style="margin-bottom:8px">Treatment</div><div style="font-size:14px;font-weight:600;margin-bottom:5px">Treatment options</div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px">From physiotherapy and bracing to PAO surgery and hip replacement — a full overview of treatment paths for all ages.</p><span class="btn-link">Read guide →</span></div>
+        <div class="edu-card" onclick="showEduGuide('exercise')"><div class="badge badge-green" style="margin-bottom:8px">Exercise</div><div style="font-size:14px;font-weight:600;margin-bottom:5px">Safe exercise guide</div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px">Strengthening hip muscles reduces pain and improves joint stability. Learn what's safe, beneficial, and what to avoid.</p><span class="btn-link">Read guide →</span></div>
+        <div class="edu-card" onclick="showEduGuide('living')"><div class="badge badge-blue" style="margin-bottom:8px">Lifestyle</div><div style="font-size:14px;font-weight:600;margin-bottom:5px">Living with HD daily</div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px">Practical advice for managing work, travel, relationships, and Texas-specific resources for chronic hip conditions.</p><span class="btn-link">Read guide →</span></div>
+        <div class="edu-card" onclick="showEduGuide('children')"><div class="badge badge-green" style="margin-bottom:8px">Children</div><div style="font-size:14px;font-weight:600;margin-bottom:5px">HD in newborns &amp; kids</div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px">DDH affects 1–3% of newborns. Early screening through Texas Children's Hospital network enables minimally invasive treatment.</p><span class="btn-link">Read guide →</span></div>
+        <div class="edu-card" onclick="showEduGuide('pao')"><div class="badge badge-blue" style="margin-bottom:8px">Surgery</div><div style="font-size:14px;font-weight:600;margin-bottom:5px">PAO surgery explained</div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px">Periacetabular osteotomy is the gold-standard procedure for adults. What to expect from a Texas specialist before and after.</p><span class="btn-link">Read guide →</span></div>
+      </div>
+    </div>
+
+    <!-- EDUCATION DETAIL -->
+    <div class="page" id="page-edu-detail">
+      <button class="back-btn" onclick="showPage('education',null)">← Back to Education hub</button>
+      <div id="edu-detail-content"></div>
+    </div>
+
+    <!-- DOCTORS LIST -->
+    <div class="page" id="page-doctors">
+      <div class="section-head"><h2>Find care in Texas</h2><p>Med Impact-verified hip dysplasia specialists — click a profile to learn more</p></div>
+      <div class="search-bar">
+        <input type="text" id="search-name" placeholder="Search by name..." oninput="filterDoctors()"/>
+        <select id="search-specialty" style="width:200px" onchange="filterDoctors()"><option value="">All specialties</option><option value="orthopedic">Orthopedic surgeon</option><option value="physiotherapist">Physiotherapist</option><option value="pediatric">Pediatric specialist</option><option value="rheumatologist">Rheumatologist</option></select>
+        <select id="search-city" style="width:180px" onchange="filterDoctors()"><option value="">All Texas cities</option><option value="dallas">Dallas / Fort Worth</option><option value="houston">Houston</option><option value="austin">Austin</option><option value="san antonio">San Antonio</option><option value="waco">Waco / Temple</option></select>
+        <button class="btn btn-green" style="white-space:nowrap" onclick="filterDoctors()">Search</button>
+      </div>
+      <div id="no-results" style="display:none;text-align:center;padding:2rem;color:var(--muted);font-size:14px">No specialists match your search. Try adjusting your filters.</div>
+
+      <div class="doctor-card" data-name="dr. rachel soto" data-specialty="orthopedic" data-city="dallas" onclick="showDocProfile('soto')">
+        <div class="doc-av" style="background:#E1F5EE;color:#085041">RS</div>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;gap:8px"><div><div style="font-size:15px;font-weight:600">Dr. Rachel Soto, MD</div><div style="font-size:12px;color:var(--muted)">Orthopedic Surgeon · PAO & Hip Preservation</div></div><span class="badge badge-green">Dallas, TX</span></div><div class="hospital-tag" style="margin-bottom:6px">UT Southwestern Medical Center · <span class="stars">★★★★★</span> 4.9 (214 reviews)</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Specializing in periacetabular osteotomy for adult hip dysplasia. 15+ years experience, 800+ PAO procedures performed.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" onclick="event.stopPropagation();openBooking('Dr. Rachel Soto, MD','UT Southwestern Medical Center · Dallas, TX')">Book appointment</button><button class="btn btn-outline" onclick="event.stopPropagation();showDocProfile('soto')">View profile</button></div></div>
+      </div>
+
+      <div class="doctor-card" data-name="dr. james kim" data-specialty="pediatric" data-city="houston" onclick="showDocProfile('kim')">
+        <div class="doc-av" style="background:#E6F1FB;color:#0C447C">JK</div>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;gap:8px"><div><div style="font-size:15px;font-weight:600">Dr. James Kim, MD</div><div style="font-size:12px;color:var(--muted)">Pediatric Orthopedic Surgeon · DDH & Newborn Screening</div></div><span class="badge badge-blue">Houston, TX</span></div><div class="hospital-tag" style="margin-bottom:6px">Texas Children's Hospital · <span class="stars">★★★★★</span> 4.9 (389 reviews)</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Renowned pediatric specialist in developmental dysplasia of the hip. Leads Texas Children's newborn screening program.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" onclick="event.stopPropagation();openBooking('Dr. James Kim, MD','Texas Children\'s Hospital · Houston, TX')">Book appointment</button><button class="btn btn-outline" onclick="event.stopPropagation();showDocProfile('kim')">View profile</button></div></div>
+      </div>
+
+      <div class="doctor-card" data-name="dr. maria perez" data-specialty="orthopedic" data-city="houston" onclick="showDocProfile('perez')">
+        <div class="doc-av" style="background:#FBEAF0;color:#72243E">MP</div>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;gap:8px"><div><div style="font-size:15px;font-weight:600">Dr. Maria Perez, MD</div><div style="font-size:12px;color:var(--muted)">Orthopedic Surgeon · Hip Preservation & Minimally Invasive</div></div><span class="badge badge-green">Houston, TX</span></div><div class="hospital-tag" style="margin-bottom:6px">Houston Methodist Hospital · <span class="stars">★★★★★</span> 4.8 (176 reviews)</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Expert in minimally invasive hip preservation surgery. Published researcher in HD outcomes at Houston Methodist Orthopedics.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" onclick="event.stopPropagation();openBooking('Dr. Maria Perez, MD','Houston Methodist Hospital · Houston, TX')">Book appointment</button><button class="btn btn-outline" onclick="event.stopPropagation();showDocProfile('perez')">View profile</button></div></div>
+      </div>
+
+      <div class="doctor-card" data-name="dr. thomas webb" data-specialty="orthopedic" data-city="waco" onclick="showDocProfile('webb')">
+        <div class="doc-av" style="background:#E1F5EE;color:#085041">TW</div>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;gap:8px"><div><div style="font-size:15px;font-weight:600">Dr. Thomas Webb, MD</div><div style="font-size:12px;color:var(--muted)">Orthopedic Surgeon · Baylor Scott &amp; White Hip Program</div></div><span class="badge badge-amber">Waco / Temple, TX</span></div><div class="hospital-tag" style="margin-bottom:6px">Baylor Scott &amp; White Medical Center · <span class="stars">★★★★☆</span> 4.7 (142 reviews)</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Leads Baylor Scott &amp; White's regional hip dysplasia program serving Central Texas. Specializes in adult HD and post-PAO rehab.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" onclick="event.stopPropagation();openBooking('Dr. Thomas Webb, MD','Baylor Scott & White · Waco, TX')">Book appointment</button><button class="btn btn-outline" onclick="event.stopPropagation();showDocProfile('webb')">View profile</button></div></div>
+      </div>
+
+      <div class="doctor-card" data-name="dr. aisha nguyen" data-specialty="pediatric" data-city="austin" onclick="showDocProfile('nguyen')">
+        <div class="doc-av" style="background:#E6F1FB;color:#0C447C">AN</div>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;gap:8px"><div><div style="font-size:15px;font-weight:600">Dr. Aisha Nguyen, MD</div><div style="font-size:12px;color:var(--muted)">Pediatric Orthopedist · Dell Children's Hip Clinic</div></div><span class="badge badge-blue">Austin, TX</span></div><div class="hospital-tag" style="margin-bottom:6px">Dell Children's Medical Center · <span class="stars">★★★★★</span> 4.9 (97 reviews)</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Austin's leading pediatric hip specialist. Runs monthly DDH screening clinics and collaborates with UT Austin Dell Medical School.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" onclick="event.stopPropagation();openBooking('Dr. Aisha Nguyen, MD','Dell Children\'s Medical Center · Austin, TX')">Book appointment</button><button class="btn btn-outline" onclick="event.stopPropagation();showDocProfile('nguyen')">View profile</button></div></div>
+      </div>
+
+      <div class="doctor-card" data-name="dr. carlos reyes" data-specialty="orthopedic" data-city="san antonio" onclick="showDocProfile('reyes')">
+        <div class="doc-av" style="background:#FAEEDA;color:#633806">CR</div>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;gap:8px"><div><div style="font-size:15px;font-weight:600">Dr. Carlos Reyes, MD</div><div style="font-size:12px;color:var(--muted)">Orthopedic Surgeon · University Health Hip Dysplasia Center</div></div><span class="badge badge-amber">San Antonio, TX</span></div><div class="hospital-tag" style="margin-bottom:6px">University Health San Antonio · <span class="stars">★★★★★</span> 4.8 (163 reviews)</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Bilingual (English/Spanish) HD specialist serving South Texas. Research affiliate with UT Health San Antonio orthopedic program.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" onclick="event.stopPropagation();openBooking('Dr. Carlos Reyes, MD','University Health San Antonio · San Antonio, TX')">Book appointment</button><button class="btn btn-outline" onclick="event.stopPropagation();showDocProfile('reyes')">View profile</button></div></div>
+      </div>
+    </div>
+
+    <!-- DOCTOR PROFILE DETAIL -->
+    <div class="page" id="page-doc-profile">
+      <button class="back-btn" onclick="showPage('doctors',null,'mob-doctors')">← Back to Find care</button>
+      <div id="doc-profile-content"></div>
+    </div>
+
+    <!-- APPOINTMENTS -->
+    <div class="page" id="page-appointments">
+      <div class="section-head"><h2>My appointments</h2><p>Manage and track all your upcoming and past visits</p></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
+        <div style="font-size:14px;font-weight:600">Upcoming</div>
+        <button class="btn btn-green" onclick="showPage('doctors',null,'mob-doctors')">+ Book new appointment</button>
+      </div>
+      <div id="appt-list">
+        <div class="appt-card"><div class="appt-date-box"><div class="day">18</div><div class="mon">APR</div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Dr. Rachel Soto, MD</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Follow-up appointment · 10:30 AM</div><div style="font-size:12px;color:var(--muted)">UT Southwestern Medical Center, Dallas</div></div><div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0"><span class="badge badge-green">Confirmed</span><button class="btn btn-outline" style="font-size:12px;padding:5px 10px">Reschedule</button></div></div>
+        <div class="appt-card"><div class="appt-date-box"><div class="day">5</div><div class="mon">MAY</div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Dr. Maria Perez, MD</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Telehealth video call · 2:00 PM</div><div style="font-size:12px;color:var(--muted)">Houston Methodist Hospital</div></div><div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0"><span class="badge badge-blue">Video call</span><button class="btn btn-outline" style="font-size:12px;padding:5px 10px">Reschedule</button></div></div>
+      </div>
+      <div style="font-size:14px;font-weight:600;margin:1.5rem 0 1rem">Past appointments</div>
+      <div class="appt-card" style="opacity:0.7"><div class="appt-date-box" style="background:#f3f4f6"><div class="day" style="color:var(--muted)">2</div><div class="mon" style="color:var(--muted)">MAR</div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">Dr. Rachel Soto, MD</div><div style="font-size:12px;color:var(--muted);margin-top:2px">New patient consultation · 9:00 AM</div><div style="font-size:12px;color:var(--muted)">UT Southwestern Medical Center, Dallas</div></div><span class="badge badge-amber">Completed</span></div>
+    </div>
+
+    <!-- DIAGNOSIS CENTER -->
+    <div class="page" id="page-diagnosis">
+      <div class="section-head"><h2>Diagnosis center</h2><p>Answer a few questions to understand your symptoms and get guidance on next steps</p></div>
+
+      <!-- QUIZ FLOW -->
+      <div id="diag-quiz">
+        <div class="card" style="margin-bottom:1.25rem" id="diag-progress-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:13px;font-weight:600;color:#374151">Assessment progress</span>
+            <span style="font-size:13px;color:var(--muted)" id="diag-prog-label">Step 1 of 6</span>
+          </div>
+          <div style="height:6px;background:#f3f4f6;border-radius:10px;overflow:hidden">
+            <div id="diag-prog-bar" style="height:100%;background:var(--green);border-radius:10px;transition:width 0.3s;width:16%"></div>
+          </div>
+        </div>
+
+        <div class="card" id="diag-q-card">
+          <div id="diag-question-area"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:1.5rem">
+            <button class="btn btn-outline" id="diag-back-btn" onclick="diagBack()" style="display:none">← Back</button>
+            <button class="btn btn-green" id="diag-next-btn" onclick="diagNext()" disabled style="opacity:0.5;margin-left:auto">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div id="diag-result" style="display:none">
+        <div id="diag-result-content"></div>
+        <div style="margin-top:1.25rem;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-green" onclick="showPage('doctors',null,'mob-doctors')">Find a specialist</button>
+          <button class="btn btn-outline" onclick="showPage('treatment',null,'mob-treatment')">View treatment plans</button>
+          <button class="btn btn-outline" onclick="diagReset()">Retake assessment</button>
+        </div>
+      </div>
+
+      <!-- INFO CARDS -->
+      <div style="margin-top:2rem">
+        <div style="font-size:15px;font-weight:600;margin-bottom:1rem">Common HD presentations</div>
+        <div class="grid-3">
+          <div class="card" style="border-left:3px solid var(--green)">
+            <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">Mild dysplasia</div>
+            <p style="font-size:13px;color:var(--muted);line-height:1.6">Shallow socket with minimal instability. Often causes groin ache after activity. May be manageable with physiotherapy for years.</p>
+            <div style="margin-top:10px;font-size:12px;color:#374151"><strong>Lateral CE angle:</strong> 20–25°</div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--blue)">
+            <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px">Moderate dysplasia</div>
+            <p style="font-size:13px;color:var(--muted);line-height:1.6">Significantly shallow socket causing pain with daily activities. Labral tears are common. PAO surgery is often considered.</p>
+            <div style="margin-top:10px;font-size:12px;color:#374151"><strong>Lateral CE angle:</strong> 15–20°</div>
+          </div>
+          <div class="card" style="border-left:3px solid #D85A30">
+            <div style="font-size:13px;font-weight:700;color:#D85A30;margin-bottom:6px">Severe dysplasia</div>
+            <p style="font-size:13px;color:var(--muted);line-height:1.6">Very shallow or absent socket coverage. Significant pain and instability. Usually requires surgery. May present with early arthritis.</p>
+            <div style="margin-top:10px;font-size:12px;color:#374151"><strong>Lateral CE angle:</strong> &lt;15°</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem">
+        <div style="font-size:15px;font-weight:600;margin-bottom:1rem">Diagnostic tests explained</div>
+        <div class="grid-2">
+          <div class="card"><div style="display:flex;align-items:start;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#1D9E75" stroke-width="1.5" fill="none"/><path d="M6 9l2 2 4-4" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div style="font-size:14px;font-weight:600;margin-bottom:4px">X-ray (AP Pelvis)</div><p style="font-size:13px;color:var(--muted);line-height:1.6">The first-line imaging test. Measures the lateral center-edge angle and acetabular index to quantify dysplasia severity. Quick, inexpensive, widely available.</p></div></div></div>
+          <div class="card"><div style="display:flex;align-items:start;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="12" height="12" rx="3" stroke="#378ADD" stroke-width="1.5" fill="none"/><path d="M6 9h6M9 6v6" stroke="#378ADD" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><div style="font-size:14px;font-weight:600;margin-bottom:4px">MRI scan</div><p style="font-size:13px;color:var(--muted);line-height:1.6">Best for assessing soft tissue — especially labral tears, cartilage damage, and fluid. Often ordered before surgery planning. No radiation.</p></div></div></div>
+          <div class="card"><div style="display:flex;align-items:start;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9a5 5 0 0110 0" stroke="#1D9E75" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="9" cy="9" r="2" fill="#1D9E75"/></svg></div><div><div style="font-size:14px;font-weight:600;margin-bottom:4px">Ultrasound</div><p style="font-size:13px;color:var(--muted);line-height:1.6">Primary tool for infants under 6 months. Safe, no radiation, and can detect DDH before the femoral head ossifies enough to show on X-ray.</p></div></div></div>
+          <div class="card"><div style="display:flex;align-items:start;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 5h12M3 9h12M3 13h8" stroke="#378ADD" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><div style="font-size:14px;font-weight:600;margin-bottom:4px">CT scan</div><p style="font-size:13px;color:var(--muted);line-height:1.6">3D imaging used for complex surgical planning. Provides detailed bone anatomy including femoral version and acetabular orientation. Used less frequently due to radiation.</p></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TREATMENT PLAN -->
+    <div class="page" id="page-treatment">
+      <div class="section-head"><h2>Treatment plan builder</h2><p>Explore personalised treatment pathways based on your age, severity, and goals</p></div>
+
+      <!-- PLAN SELECTOR -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div style="font-size:14px;font-weight:600;margin-bottom:1rem">Build your treatment profile</div>
+        <div class="grid-3" style="margin-bottom:1rem">
+          <div class="form-group" style="margin-bottom:0">
+            <label style="display:block;margin-bottom:5px">Age group</label>
+            <select id="tp-age" onchange="buildPlan()"><option value="">Select age...</option><option value="infant">Infant (0–12 months)</option><option value="child">Child (1–10 years)</option><option value="teen">Teen (11–17 years)</option><option value="young">Young adult (18–35)</option><option value="adult">Adult (36–55)</option><option value="older">Older adult (55+)</option></select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label style="display:block;margin-bottom:5px">Severity</label>
+            <select id="tp-severity" onchange="buildPlan()"><option value="">Select severity...</option><option value="mild">Mild</option><option value="moderate">Moderate</option><option value="severe">Severe</option></select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label style="display:block;margin-bottom:5px">Primary goal</label>
+            <select id="tp-goal" onchange="buildPlan()"><option value="">Select goal...</option><option value="pain">Reduce pain</option><option value="active">Stay active / return to sport</option><option value="longterm">Long-term joint preservation</option><option value="surgery">Explore surgical options</option></select>
+          </div>
+        </div>
+        <div id="tp-prompt" style="font-size:13px;color:var(--muted);text-align:center;padding:1rem 0">Select your age group, severity, and goal above to generate a personalised plan</div>
+      </div>
+
+      <div id="tp-result" style="display:none">
+        <div id="tp-result-content"></div>
+      </div>
+
+      <!-- ALWAYS VISIBLE: treatment overview -->
+      <div style="margin-top:1.5rem">
+        <div style="font-size:15px;font-weight:600;margin-bottom:1rem">All treatment options at a glance</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="card"><div style="display:flex;align-items:start;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🦺</div><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:6px"><div style="font-size:14px;font-weight:600">Pavlik harness / bracing</div><span class="badge badge-green">Infants · 0–6 months</span></div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px">Soft brace worn 23 hrs/day to hold hips in correct position. Success rate over 90% when started in the first 3 months. No surgery, no anaesthesia.</p><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Non-surgical</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">6–12 weeks</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">High success rate</span></div></div></div></div>
+          <div class="card"><div style="display:flex;align-items:start;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🏃</div><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:6px"><div style="font-size:14px;font-weight:600">Physiotherapy</div><span class="badge badge-blue">All ages · Mild–Moderate</span></div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px">Targeted strengthening of hip abductors, external rotators, and core reduces joint load and pain. Often the first-line treatment for adults. Best combined with activity modification.</p><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Non-surgical</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Ongoing</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Pain reduction</span></div></div></div></div>
+          <div class="card"><div style="display:flex;align-items:start;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🔭</div><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:6px"><div style="font-size:14px;font-weight:600">Hip arthroscopy</div><span class="badge badge-green">Teens · Adults · Labral tears</span></div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px">Minimally invasive keyhole surgery to repair labral tears and remove loose cartilage. Often performed alongside or before PAO. Recovery 3–6 months.</p><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Minimally invasive</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">3–6 months recovery</span></div></div></div></div>
+          <div class="card"><div style="display:flex;align-items:start;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🦴</div><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:6px"><div style="font-size:14px;font-weight:600">Periacetabular Osteotomy (PAO)</div><span class="badge badge-blue">Adults 15–45 · Moderate–Severe</span></div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px">Gold-standard surgery for adults with healthy cartilage. The socket is repositioned to improve femoral head coverage. Preserves your own hip joint. 85–90% of patients report significant improvement.</p><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Major surgery</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">9–12 months recovery</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Joint-preserving</span></div></div></div></div>
+          <div class="card"><div style="display:flex;align-items:start;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">⚙️</div><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:6px"><div style="font-size:14px;font-weight:600">Total hip replacement (THR)</div><span class="badge badge-amber">Adults 50+ · Advanced arthritis</span></div><p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px">Replacement of the entire hip joint with a prosthesis. Considered when arthritis is advanced and other options are exhausted. Modern implants last 20–25 years. Excellent pain relief.</p><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Major surgery</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">3–6 months recovery</span><span style="font-size:12px;background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px">Last resort</span></div></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESEARCH -->
+    <div class="page" id="page-research">
+      <div class="section-head"><h2>Research dashboard</h2><p>Anonymized insights from 14,203 Texas patients in the Med Impact network</p></div>
+      <div class="grid-4" style="margin-bottom:1.5rem">
+        <div class="metric"><div class="metric-val">14,203</div><div class="metric-lab">Active TX patients</div></div>
+        <div class="metric"><div class="metric-val">-38%</div><div class="metric-lab">Avg pain reduction</div></div>
+        <div class="metric"><div class="metric-val">91%</div><div class="metric-lab">Post-surgery success</div></div>
+        <div class="metric"><div class="metric-val">312</div><div class="metric-lab">TX specialists</div></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:14px">
+        <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:1rem">Avg pain score over time by treatment (Texas cohort)</div><canvas id="chart-pain" height="200"></canvas></div>
+        <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:1rem">Patient outcomes at 12 months</div><canvas id="chart-outcomes" height="200"></canvas></div>
+      </div>
+      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:1rem">Diagnosis age distribution across Texas network</div><canvas id="chart-age" height="100"></canvas></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ===== LEGAL OVERLAY ===== */
+var legalPages={
+  tos:{
+    title:'Terms of Service',
+    badge:'Legal',
+    badgeColor:'#085041',
+    badgeBg:'#E1F5EE',
+    updated:'March 16, 2026',
+    content:`
+<div style="background:linear-gradient(135deg,#f0fdf8,#e8f4fd);border-radius:16px;padding:2rem;margin-bottom:2rem;border:1px solid #d1f0e4">
+  <span style="display:inline-block;background:#E1F5EE;color:#085041;font-size:12px;font-weight:600;padding:3px 12px;border-radius:20px;margin-bottom:0.75rem">Legal</span>
+  <h1 style="font-size:28px;font-weight:800;margin-bottom:8px">Terms of Service</h1>
+  <p style="font-size:14px;color:#6b7280;line-height:1.6">Please read these terms carefully before using Med Impact. By creating an account you agree to be bound by these terms.</p>
+  <div style="display:flex;gap:2rem;margin-top:1rem;flex-wrap:wrap;font-size:13px;color:#6b7280"><span><strong style="color:#1a1a1a">Effective:</strong> March 16, 2026</span><span><strong style="color:#1a1a1a">Version:</strong> 1.0</span></div>
+</div>
+<div style="background:#E1F5EE;border-left:3px solid #1D9E75;border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:2rem"><p style="font-size:13px;color:#085041;line-height:1.6;margin:0"><strong>Summary:</strong> Med Impact is an informational health platform. We are not a medical provider. Nothing here constitutes medical advice. Always consult a qualified healthcare professional for diagnosis and treatment.</p></div>
+${legalSection('1. Acceptance of Terms','By accessing or using Med Impact ("Platform"), you agree to be legally bound by these Terms of Service and our Privacy Policy. If you do not agree, you must not use the Platform. These Terms constitute a legally binding agreement between you and Med Impact, a project developed for the BHA Competition 2026.')}
+${legalSection('2. Description of Services','Med Impact provides a digital health support platform for individuals living with hip dysplasia in Texas, including:<ul><li><strong>Symptom tracking</strong> — log and monitor pain, mobility, and symptoms over time</li><li><strong>Education hub</strong> — evidence-based guides on hip dysplasia, treatment, and lifestyle</li><li><strong>Specialist directory</strong> — curated list of HD-experienced healthcare professionals across Texas</li><li><strong>Appointment scheduling</strong> — request and schedule appointments with listed providers</li><li><strong>Research dashboard</strong> — anonymized, aggregated data from consenting users</li></ul>','Med Impact does NOT provide medical diagnosis, treatment, clinical assessments, prescriptions, or any direct healthcare services.')}
+${legalSection('3. Eligibility and Account Registration','You must be at least 13 years old to use the Platform. Users under 18 require parental consent. You agree to provide accurate information at registration, keep your password confidential, and accept responsibility for all activity under your account.')}
+${legalSection('4. Medical Disclaimer','ALL content on the Platform is for informational purposes only. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always seek advice from a qualified physician for any medical condition. Never disregard professional medical advice because of something you read on this Platform. Call 911 for medical emergencies.','Reliance on any information provided through the Platform is solely at your own risk.')}
+${legalSection('5. User Responsibilities','You agree not to: submit false or fraudulent health information; impersonate any person or healthcare professional; attempt unauthorized access to the Platform; introduce malware or harmful code; use automated bots to collect data; or use the Platform to harass or harm other users.')}
+${legalSection('6. Health Data and Privacy','Our collection and use of your health data is governed by our Privacy Policy. Key commitments: you control whether your anonymized data is used for research; we will never sell your personal health data; we use industry-standard encryption; you may request deletion of your account and data at any time.')}
+${legalSection('7. Research Participation','Research participation is entirely voluntary and opt-in. If you consent, your symptom data is anonymized and aggregated before use — no personally identifiable information is ever included. You may withdraw research consent at any time in your account settings.')}
+${legalSection('8. Third-Party Healthcare Providers','Specialists listed in the directory are independent providers, not employees of Med Impact. Inclusion does not constitute an endorsement. You are responsible for independently verifying provider credentials. Appointment booking requests are subject to provider confirmation — always verify directly with the provider\'s office.')}
+${legalSection('9. Limitation of Liability','To the maximum extent permitted by law, Med Impact shall not be liable for any indirect, incidental, or consequential damages arising from use of the Platform, including reliance on health information, actions of third-party providers, or unauthorized access to your account.')}
+${legalSection('10. Governing Law','These Terms are governed by the laws of the State of Texas. Disputes shall be resolved through binding arbitration in Dallas, Texas, in accordance with American Arbitration Association rules.')}
+${legalSection('11. Changes to These Terms','We may update these Terms from time to time. We will notify registered users of material changes at least 14 days in advance. Continued use of the Platform after changes take effect constitutes acceptance.')}
+${legalSection('12. Contact','Legal inquiries: <strong>legal@medimpact.health</strong> &nbsp;·&nbsp; Support: <strong>support@medimpact.health</strong> &nbsp;·&nbsp; Med Impact · BHA Competition 2026 · Texas, USA')}
+`
+  },
+  privacy:{
+    title:'Privacy Policy',
+    badge:'Legal',
+    badgeColor:'#0C447C',
+    badgeBg:'#E6F1FB',
+    updated:'March 16, 2026',
+    content:`
+<div style="background:linear-gradient(135deg,#e6f1fb,#f0fdf8);border-radius:16px;padding:2rem;margin-bottom:2rem;border:1px solid #c0d9f5">
+  <span style="display:inline-block;background:#E6F1FB;color:#0C447C;font-size:12px;font-weight:600;padding:3px 12px;border-radius:20px;margin-bottom:0.75rem">Legal</span>
+  <h1 style="font-size:28px;font-weight:800;margin-bottom:8px">Privacy Policy</h1>
+  <p style="font-size:14px;color:#6b7280;line-height:1.6">Your privacy matters to us. This policy explains what data we collect, why, how we protect it, and what rights you have.</p>
+  <div style="display:flex;gap:2rem;margin-top:1rem;flex-wrap:wrap;font-size:13px;color:#6b7280"><span><strong style="color:#1a1a1a">Effective:</strong> March 16, 2026</span><span><strong style="color:#1a1a1a">Version:</strong> 1.0</span></div>
+</div>
+<div style="background:#E6F1FB;border-left:3px solid #378ADD;border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:2rem"><p style="font-size:13px;color:#0C447C;line-height:1.6;margin:0"><strong>Our commitment:</strong> We will never sell your personal health data. We collect only what is necessary. You can delete your account and data at any time. Research use of your data is opt-in and fully anonymized.</p></div>
+${legalSection('1. Who We Are','Med Impact is a digital health support platform developed for the BHA Competition 2026, designed for patients living with hip dysplasia across Texas. We are the data controller responsible for personal information collected through this platform. Questions? Contact us at <strong>privacy@medimpact.health</strong>.')}
+${legalSection('2. What Information We Collect','<strong>Information you provide:</strong><ul><li>Account info — name, email, password (required)</li><li>Profile info — role, date of diagnosis (optional)</li><li>Health data — pain logs, mobility ratings, symptom notes (optional)</li><li>Appointment data — visit type, insurance, reason for visit (for bookings)</li></ul><strong>Collected automatically:</strong><ul><li>Usage data — pages viewed, features used</li><li>Device data — device type, operating system, browser</li><li>Log data — IP address, access timestamps (for security)</li></ul><strong>We do NOT collect:</strong> government ID numbers, payment card details, biometric data, or social media profiles.')}
+${legalSection('3. How We Use Your Information','We use your data to: provide and maintain the Platform; process appointment requests; personalize your experience; send appointment reminders and account notifications; detect and prevent fraud; improve the Platform; contribute anonymized data to research (with your consent); and meet legal obligations.','We do not use your data for advertising. Med Impact does not serve advertisements and does not share data with advertisers.')}
+${legalSection('4. How We Share Your Information','<strong>We never sell your data.</strong> We share data only:<ul><li><strong>With healthcare providers</strong> — only the information needed to process your booking request, at your direction</li><li><strong>With service providers</strong> — cloud hosting, email delivery, anonymized analytics — all under strict data processing agreements</li><li><strong>When required by law</strong> — court orders, legal obligations, or to protect the safety of any person</li></ul>')}
+${legalSection('5. Health Data and Research','Your symptom log is accessible only to you (and providers you explicitly authorize). If you opt in to research, your data is: fully anonymized (all direct identifiers removed); aggregated with other users\' data; shared only with Texas medical schools and hospital research programs. Re-identification is technically and contractually prohibited. You can withdraw research consent at any time in your account settings.')}
+${legalSection('6. Data Security','We protect your data with: TLS 1.3 encryption in transit; AES-256 encryption at rest; role-based access controls; secure password hashing (bcrypt); full audit logging of health data access; and regular security assessments. In the event of a data breach affecting your personal information, we will notify you within 72 hours.')}
+${legalSection('7. Data Retention','Account information is retained for the duration of your account plus 30 days. Symptom tracking data is retained for the duration of your account. Appointment records are retained for 7 years. Usage and log data is retained for 12 months. When you delete your account, personal data is deleted or anonymized within 30 days.')}
+${legalSection('8. Your Rights','You have the right to: access a copy of all data we hold about you; correct inaccurate data; request deletion of your account and data; receive your data in a portable format (JSON/CSV); restrict processing while a dispute is resolved; and opt out of research at any time. To exercise any right, email <strong>privacy@medimpact.health</strong>. We respond within 30 days. We will never discriminate against you for exercising your privacy rights.')}
+${legalSection('9. Texas Privacy Rights (TDPSA)','As a Texas resident you have rights under the Texas Data Privacy and Security Act: the right to know what data we collect; the right to deletion; the right to correction; the right to data portability; and the right to opt out of targeted advertising and sale of personal data (both automatically honored — we do neither). Submit requests to <strong>privacy@medimpact.health</strong> with the subject line "Texas Privacy Rights Request."')}
+${legalSection('10. Cookies','We use only: session cookies (keep you logged in); preference cookies (remember your settings, 12 months); and anonymized analytics cookies (improve the platform, 12 months). We do not use advertising cookies, cross-site tracking cookies, or social media pixels.')}
+${legalSection('11. Children\'s Privacy','Med Impact is for users aged 13 and above. Users aged 13–17 require verifiable parental consent. We do not knowingly collect data from children under 13. If you believe we have done so in error, contact privacy@medimpact.health immediately.')}
+${legalSection('12. Changes to This Policy','We will notify registered users of material changes by email or in-app notification at least 14 days before they take effect. The "last updated" date at the top of this policy will always reflect the most recent revision.')}
+${legalSection('13. Contact','Privacy: <strong>privacy@medimpact.health</strong> &nbsp;·&nbsp; Security: <strong>security@medimpact.health</strong> &nbsp;·&nbsp; Med Impact · BHA Competition 2026 · Texas, USA')}
+`
+  }
+};
+
+function legalSection(title,body,warn){
+  var w=warn?'<div style="background:#FAEEDA;border-left:3px solid #BA7517;border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-top:10px"><p style="font-size:13px;color:#633806;line-height:1.6;margin:0">⚠️ '+warn+'</p></div>':'';
+  return '<div style="margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border)"><h2 style="font-size:17px;font-weight:700;margin-bottom:0.75rem;color:#1a1a1a">'+title+'</h2><div style="font-size:14px;color:#374151;line-height:1.8">'+body+'</div>'+w+'</div>';
+}
+
+function showLegal(type){
+  var pg=legalPages[type];
+  if(!pg)return;
+  document.getElementById('legalContent').innerHTML=pg.content;
+  document.getElementById('legalOverlay').style.display='block';
+  document.getElementById('legalOverlay').scrollTop=0;
+  document.body.style.overflow='hidden';
+}
+function closeLegal(){
+  document.getElementById('legalOverlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+/* ===== AUTH ===== */
+function switchAuth(t){
+  document.querySelectorAll('.auth-tab').forEach(function(b,i){b.className='auth-tab'+(i===(t==='login'?0:1)?' active':'')});
+  document.getElementById('auth-login').className='auth-section'+(t==='login'?' active':'');
+  document.getElementById('auth-signup').className='auth-section'+(t==='signup'?' active':'');
+}
+function doLogin(){var e=document.getElementById('login-email').value||'user@medimpact.com';setUser(e.split('@')[0]);launchApp();}
+function doSignup(){var f=document.getElementById('su-first').value||'Alex';var l=document.getElementById('su-last').value||'Johnson';setUser(f+' '+l);launchApp();}
+function setUser(n){var p=n.trim().split(' ');document.getElementById('user-av').textContent=(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase();document.getElementById('user-name').textContent=p[0]+(p[1]?' '+p[1][0]+'.':'');}
+function launchApp(){document.getElementById('authWrap').style.display='none';document.getElementById('appWrap').style.display='block';initCharts();}
+function doLogout(){document.getElementById('authWrap').style.display='flex';document.getElementById('appWrap').style.display='none';}
+
+/* ===== NAVIGATION ===== */
+function showPage(id,desktopBtn,mobId){
+  document.querySelectorAll('.page').forEach(function(p){p.className='page'});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.className='nav-btn'});
+  document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.className='mob-nav-btn'});
+  document.getElementById('page-'+id).className='page active';
+  if(desktopBtn)desktopBtn.className='nav-btn active';
+  if(mobId)document.getElementById(mobId).className='mob-nav-btn active';
+  if(id==='research')initCharts();
+  if(id==='diagnosis'&&Object.keys(diagAnswers).length===0)diagRender();
+  window.scrollTo(0,0);
+}
+
+/* ===== TRACKER ===== */
+function logEntry(){
+  var pain=document.querySelector('input[type=range]').value;
+  var side=document.getElementById('t-side').value;
+  var mob=document.getElementById('t-mob').value;
+  var notes=document.getElementById('t-notes').value;
+  var p=parseInt(pain);
+  var cls=p>=7?'badge-amber':p>=4?'badge-blue':'badge-green';
+  var el=document.createElement('div');el.className='log-entry';
+  el.innerHTML='<div><div style="font-size:11px;color:var(--muted)">Just now</div><div style="font-size:14px;font-weight:600;margin:4px 0">Pain: '+pain+'/10 · '+side+'</div><div style="font-size:12px;color:var(--muted)">'+mob+'</div>'+(notes?'<div style="font-size:12px;color:var(--muted);margin-top:3px">'+notes+'</div>':'')+'</div><span class="badge '+cls+'">'+pain+'</span>';
+  document.getElementById('log-list').insertBefore(el,document.getElementById('log-list').firstChild);
+  document.getElementById('t-notes').value='';
+}
+
+/* ===== DOCTOR SEARCH FILTER ===== */
+function filterDoctors(){
+  var name=(document.getElementById('search-name').value||'').toLowerCase().trim();
+  var spec=(document.getElementById('search-specialty').value||'').toLowerCase();
+  var city=(document.getElementById('search-city').value||'').toLowerCase();
+  var cards=document.querySelectorAll('#page-doctors .doctor-card');
+  var any=false;
+  cards.forEach(function(c){
+    var n=(c.getAttribute('data-name')||'').toLowerCase();
+    var s=(c.getAttribute('data-specialty')||'').toLowerCase();
+    var ci=(c.getAttribute('data-city')||'').toLowerCase();
+    var ok=(!name||n.indexOf(name)>-1)&&(!spec||s===spec)&&(!city||ci===city);
+    c.setAttribute('data-hidden',ok?'false':'true');
+    c.style.display=ok?'flex':'none';
+    if(ok)any=true;
+  });
+  document.getElementById('no-results').style.display=any?'none':'block';
+}
+
+/* ===== DOCTOR PROFILES ===== */
+var docProfiles={
+  soto:{
+    name:'Dr. Rachel Soto, MD',initials:'RS',avBg:'#E1F5EE',avColor:'#085041',
+    title:'Orthopedic Surgeon · PAO & Hip Preservation Specialist',
+    hospital:'UT Southwestern Medical Center',city:'Dallas, TX',
+    stars:'★★★★★',rating:'4.9',reviews:'214',
+    experience:'15+ years',procedures:'800+',patients:'2,400+',successRate:'96%',
+    about:'Dr. Rachel Soto is one of Texas\'s leading orthopedic surgeons specializing in periacetabular osteotomy (PAO) and hip preservation for adults with hip dysplasia. She completed her fellowship at Hospital for Special Surgery in New York before joining UT Southwestern, where she leads the Hip Preservation Program.',
+    education:['MD — UT Southwestern Medical School','Residency — Orthopedic Surgery, UT Southwestern','Fellowship — Hip Preservation, Hospital for Special Surgery, NYC'],
+    specialties:['Periacetabular Osteotomy (PAO)','Hip Preservation Surgery','Adult Hip Dysplasia','Post-PAO Rehabilitation','Hip Arthroscopy'],
+    languages:['English','Spanish'],
+    insurance:['Blue Cross Blue Shield TX','UnitedHealthcare','Aetna','Cigna','Medicare','Medicaid Texas'],
+    reviews:[{name:'Sarah M.',rating:'★★★★★',text:'Dr. Soto changed my life. After years of misdiagnosis, she correctly identified my hip dysplasia and performed my PAO surgery. I\'m now pain-free and back to hiking.'},
+             {name:'James T.',rating:'★★★★★',text:'Incredibly thorough and compassionate. She took time to explain every step of the process and the recovery. Highly recommend for anyone considering PAO.'},
+             {name:'Priya K.',rating:'★★★★☆',text:'Great surgeon and a caring team. The follow-up care was excellent. Wait times for appointments can be long given her reputation, but worth it.'}]
+  },
+  kim:{
+    name:'Dr. James Kim, MD',initials:'JK',avBg:'#E6F1FB',avColor:'#0C447C',
+    title:'Pediatric Orthopedic Surgeon · DDH & Newborn Screening',
+    hospital:'Texas Children\'s Hospital',city:'Houston, TX',
+    stars:'★★★★★',rating:'4.9',reviews:'389',
+    experience:'18 years',procedures:'1,200+',patients:'4,800+',successRate:'98%',
+    about:'Dr. James Kim is nationally recognized for his expertise in developmental dysplasia of the hip (DDH) in infants and children. He leads the Texas Children\'s Hospital Newborn Hip Screening Program, which screens over 10,000 newborns annually across the Houston metro area.',
+    education:['MD — Baylor College of Medicine','Residency — Pediatric Orthopedic Surgery, Texas Children\'s Hospital','Fellowship — Pediatric Hip Disorders, Children\'s Hospital of Philadelphia'],
+    specialties:['Developmental Dysplasia of the Hip (DDH)','Newborn Hip Screening','Pavlik Harness Treatment','Closed & Open Hip Reduction','Pediatric PAO'],
+    languages:['English','Korean'],
+    insurance:['Blue Cross Blue Shield TX','UnitedHealthcare','Aetna','Medicaid Texas','CHIP Texas','Cigna'],
+    reviews:[{name:'Maria L.',rating:'★★★★★',text:'Dr. Kim caught my daughter\'s DDH at 6 weeks old. His calm, reassuring manner helped our whole family through a stressful time. She is now walking perfectly at age 2.'},
+             {name:'David R.',rating:'★★★★★',text:'World-class pediatric specialist. We flew in from out of state specifically to see Dr. Kim. Absolutely worth it — he is the best in the country for DDH.'},
+             {name:'Amanda W.',rating:'★★★★★',text:'From diagnosis to follow-up, Dr. Kim and his team were exceptional. He explains everything in plain English and always has time for questions.'}]
+  },
+  perez:{
+    name:'Dr. Maria Perez, MD',initials:'MP',avBg:'#FBEAF0',avColor:'#72243E',
+    title:'Orthopedic Surgeon · Hip Preservation & Minimally Invasive',
+    hospital:'Houston Methodist Hospital',city:'Houston, TX',
+    stars:'★★★★★',rating:'4.8',reviews:'176',
+    experience:'12 years',procedures:'600+',patients:'1,900+',successRate:'94%',
+    about:'Dr. Maria Perez is an orthopedic surgeon and published researcher specializing in minimally invasive hip preservation procedures. She leads the Houston Methodist Orthopedic Hip Dysplasia Research Group and has published over 30 peer-reviewed papers on HD outcomes.',
+    education:['MD — University of Texas Health Science Center','Residency — Orthopedic Surgery, Houston Methodist','Fellowship — Hip Preservation & Arthroscopy, Andrews Institute, FL'],
+    specialties:['Minimally Invasive Hip Surgery','Hip Arthroscopy','Hip Labral Repair','Periacetabular Osteotomy','HD Outcomes Research'],
+    languages:['English','Spanish','Portuguese'],
+    insurance:['Blue Cross Blue Shield TX','UnitedHealthcare','Aetna','Cigna','Humana','Medicare'],
+    reviews:[{name:'Tanya B.',rating:'★★★★★',text:'Dr. Perez is the real deal. Her minimally invasive approach meant I was walking within days of my surgery. Her research background shows in every decision she makes.'},
+             {name:'Carlos F.',rating:'★★★★★',text:'Brilliant surgeon and a genuinely kind person. She took my case when other surgeons said it was too complex. I\'m so grateful.'},
+             {name:'Rachel S.',rating:'★★★★☆',text:'Very knowledgeable and professional. The clinic can be busy but the quality of care is excellent.'}]
+  },
+  webb:{
+    name:'Dr. Thomas Webb, MD',initials:'TW',avBg:'#E1F5EE',avColor:'#085041',
+    title:'Orthopedic Surgeon · Baylor Scott & White Hip Program',
+    hospital:'Baylor Scott & White Medical Center',city:'Waco / Temple, TX',
+    stars:'★★★★☆',rating:'4.7',reviews:'142',
+    experience:'20 years',procedures:'950+',patients:'3,100+',successRate:'93%',
+    about:'Dr. Thomas Webb founded and leads the Baylor Scott & White Regional Hip Dysplasia Program, which serves patients across Central Texas from Waco to Temple. With over 20 years of experience, he is the most experienced hip dysplasia surgeon in Central Texas and a key advocate for expanding HD care outside major metro areas.',
+    education:['MD — Texas A&M College of Medicine','Residency — Orthopedic Surgery, Scott & White Medical Center','Fellowship — Adult Reconstruction & Hip, Mayo Clinic, Rochester MN'],
+    specialties:['Adult Hip Dysplasia','Periacetabular Osteotomy','Post-PAO Rehabilitation','Total Hip Arthroplasty','Regional HD Program Leadership'],
+    languages:['English'],
+    insurance:['Blue Cross Blue Shield TX','UnitedHealthcare','Aetna','Cigna','Humana','Medicare','Medicaid Texas'],
+    reviews:[{name:'Linda H.',rating:'★★★★★',text:'Dr. Webb is a hidden gem in Central Texas. We didn\'t have to drive to Dallas or Houston — he was right here and the care was outstanding.'},
+             {name:'Mike D.',rating:'★★★★☆',text:'Very experienced and straightforward. He tells you exactly what to expect and delivers on it. My PAO recovery was smooth thanks to his thorough planning.'},
+             {name:'Christine O.',rating:'★★★★★',text:'I\'ve been a patient of Dr. Webb for 8 years. He managed my HD through two pregnancies and eventually my PAO. Couldn\'t ask for better care.'}]
+  },
+  nguyen:{
+    name:'Dr. Aisha Nguyen, MD',initials:'AN',avBg:'#E6F1FB',avColor:'#0C447C',
+    title:'Pediatric Orthopedist · Dell Children\'s Hip Clinic',
+    hospital:'Dell Children\'s Medical Center',city:'Austin, TX',
+    stars:'★★★★★',rating:'4.9',reviews:'97',
+    experience:'10 years',procedures:'420+',patients:'1,500+',successRate:'97%',
+    about:'Dr. Aisha Nguyen is Austin\'s leading pediatric hip specialist, running monthly DDH screening clinics at Dell Children\'s Medical Center. She is a research collaborator with UT Austin\'s Dell Medical School and is currently leading a statewide study on HD prevalence in Texas newborns.',
+    education:['MD — UT Austin Dell Medical School (inaugural class)','Residency — Pediatric Orthopedics, Children\'s Medical Center Dallas','Fellowship — Pediatric Hip Disorders, Boston Children\'s Hospital'],
+    specialties:['Pediatric Hip Dysplasia','DDH Screening Clinics','Pavlik Harness & Bracing','Hip Spica Cast Management','Pediatric Research'],
+    languages:['English','Vietnamese'],
+    insurance:['Blue Cross Blue Shield TX','UnitedHealthcare','Aetna','Medicaid Texas','CHIP Texas','Cigna'],
+    reviews:[{name:'Jade P.',rating:'★★★★★',text:'Dr. Nguyen caught my son\'s hip dysplasia at his 2-month screening. Her calm confidence made a terrifying situation manageable. He is doing wonderfully.'},
+             {name:'Sara M.',rating:'★★★★★',text:'Absolutely wonderful doctor. She is thorough, warm, and clearly deeply passionate about her work. The monthly clinics she runs are so valuable for Austin families.'},
+             {name:'Brian K.',rating:'★★★★★',text:'We drove from San Antonio to see Dr. Nguyen after struggling to find a pediatric specialist. Totally worth it. Her expertise is unmatched.'}]
+  },
+  reyes:{
+    name:'Dr. Carlos Reyes, MD',initials:'CR',avBg:'#FAEEDA',avColor:'#633806',
+    title:'Orthopedic Surgeon · University Health Hip Dysplasia Center',
+    hospital:'University Health San Antonio',city:'San Antonio, TX',
+    stars:'★★★★★',rating:'4.8',reviews:'163',
+    experience:'14 years',procedures:'700+',patients:'2,200+',successRate:'95%',
+    about:'Dr. Carlos Reyes leads the Hip Dysplasia Center at University Health San Antonio and is a research affiliate of UT Health San Antonio\'s orthopedic program. As a bilingual specialist fluent in English and Spanish, he is a vital resource for San Antonio\'s large Spanish-speaking population navigating complex hip conditions.',
+    education:['MD — University of Texas Health San Antonio','Residency — Orthopedic Surgery, University Health','Fellowship — Adult Hip Reconstruction, Rush University Medical Center, Chicago'],
+    specialties:['Adult Hip Dysplasia','Periacetabular Osteotomy','Bilingual Patient Care (EN/ES)','Hip Preservation','UT Health Research Affiliate'],
+    languages:['English','Spanish'],
+    insurance:['Blue Cross Blue Shield TX','UnitedHealthcare','Aetna','Cigna','Medicaid Texas','Medicare','Community First Health Plans'],
+    reviews:[{name:'Gabriela M.',rating:'★★★★★',text:'Dr. Reyes es excepcional. Por primera vez tuve un médico que me explicó todo en español. Su cuidado y atención son de clase mundial.'},
+             {name:'Robert T.',rating:'★★★★★',text:'Outstanding surgeon and researcher. He presented my case at a conference and brought cutting-edge techniques to my treatment. Truly exceptional care.'},
+             {name:'Yolanda V.',rating:'★★★★★',text:'Dr. Reyes took the time to understand my full history before recommending surgery. His conservative approach first saved me from an unnecessary procedure.'}]
+  }
+};
+
+function showDocProfile(id){
+  var d=docProfiles[id];
+  if(!d)return;
+  var tags=function(arr){return arr.map(function(t){return '<span class="tag">'+t+'</span>';}).join('');};
+  var revs=d.reviews.map(function(r){return '<div class="review-card"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:13px;font-weight:600">'+r.name+'</div><div style="font-size:12px;color:#f59e0b">'+r.rating+'</div></div><div style="font-size:13px;color:#374151;line-height:1.6">'+r.text+'</div></div>';}).join('');
+  var html='<div class="profile-header"><div style="display:flex;gap:20px;align-items:start;flex-wrap:wrap;margin-bottom:1.5rem"><div class="profile-av" style="background:'+d.avBg+';color:'+d.avColor+'">'+d.initials+'</div><div style="flex:1;min-width:200px"><div style="font-size:22px;font-weight:700;margin-bottom:4px">'+d.name+'</div><div style="font-size:14px;color:var(--muted);margin-bottom:8px">'+d.title+'</div><div style="font-size:13px;margin-bottom:4px">🏥 <strong>'+d.hospital+'</strong></div><div style="font-size:13px;color:var(--muted);margin-bottom:8px">📍 '+d.city+'</div><div style="font-size:13px;color:#f59e0b;margin-bottom:12px">'+d.stars+' <span style="color:#1a1a1a;font-weight:600">'+d.rating+'</span> <span style="color:var(--muted)">('+d.reviews+' reviews)</span></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-green" onclick="openBooking(\''+d.name+'\',\''+d.hospital+' · '+d.city+'\')">Book appointment</button><button class="btn btn-outline">Message doctor</button></div></div></div>'
+  +'<div class="grid-4" style="margin-bottom:0"><div class="stat-box"><div class="stat-val">'+d.experience+'</div><div class="stat-lab">Experience</div></div><div class="stat-box"><div class="stat-val">'+d.procedures+'</div><div class="stat-lab">Procedures</div></div><div class="stat-box"><div class="stat-val">'+d.patients+'</div><div class="stat-lab">Patients treated</div></div><div class="stat-box"><div class="stat-val">'+d.successRate+'</div><div class="stat-lab">Success rate</div></div></div></div>'
+  +'<div class="grid-2" style="align-items:start"><div>'
+  +'<div class="card" style="margin-bottom:14px"><div style="font-size:14px;font-weight:700;margin-bottom:10px">About</div><p style="font-size:13px;color:#374151;line-height:1.7">'+d.about+'</p></div>'
+  +'<div class="card" style="margin-bottom:14px"><div style="font-size:14px;font-weight:700;margin-bottom:10px">Specialties</div>'+tags(d.specialties)+'</div>'
+  +'<div class="card"><div style="font-size:14px;font-weight:700;margin-bottom:10px">Education &amp; training</div>'
+  +d.education.map(function(e){return '<div style="font-size:13px;color:#374151;padding:6px 0;border-bottom:1px solid #f3f4f6;line-height:1.5">'+e+'</div>';}).join('')+'</div>'
+  +'</div><div>'
+  +'<div class="card" style="margin-bottom:14px"><div style="font-size:14px;font-weight:700;margin-bottom:10px">Languages</div>'+tags(d.languages)+'</div>'
+  +'<div class="card" style="margin-bottom:14px"><div style="font-size:14px;font-weight:700;margin-bottom:10px">Accepted insurance</div>'+tags(d.insurance)+'</div>'
+  +'<div class="card"><div style="font-size:14px;font-weight:700;margin-bottom:10px">Patient reviews</div>'+revs+'</div>'
+  +'</div></div>';
+  document.getElementById('doc-profile-content').innerHTML=html;
+  showPage('doc-profile',null,null);
+}
+
+/* ===== EDUCATION GUIDES ===== */
+var eduGuides={
+  what:{
+    badge:'Basics',badgeClass:'badge-green',
+    title:'What is hip dysplasia?',
+    subtitle:'A complete guide to understanding hip dysplasia — causes, symptoms, and how it is diagnosed',
+    sections:[
+      {h:'Overview',p:'Hip dysplasia (HD) is a condition where the hip socket (acetabulum) does not fully cover the ball-shaped head of the femur (thigh bone). This shallow socket can cause the hip joint to be unstable, leading to partial or complete dislocation. It is one of the most common musculoskeletal conditions, affecting approximately 1 in 20 people to some degree.',info:'Hip dysplasia is a spectrum condition — it ranges from mild instability to complete dislocation. Many people live with mild dysplasia for years without knowing it.'},
+      {h:'What causes hip dysplasia?',p:'Hip dysplasia is caused by a combination of genetic and environmental factors:',ul:['Genetics: HD runs in families — having a first-degree relative with HD significantly increases your risk','Birth position: Breech presentation at birth is associated with higher rates of DDH','First-born children: The uterus is tighter, placing more stress on the developing hip','Female sex: HD is 4–5x more common in females, likely due to hormonal differences affecting ligament laxity','Swaddling: Tight swaddling with legs extended can exacerbate undiagnosed DDH']},
+      {h:'Symptoms to watch for',p:'Symptoms vary by age and severity of dysplasia:',ul:['In infants: Uneven leg lengths, asymmetric skin folds on the thighs, clicking sound from the hip','In children: Limping, toe walking, one leg appears shorter','In teens and adults: Groin pain especially with activity, clicking or catching sensation in the hip, reduced range of motion, early-onset arthritis'],warn:'Hip dysplasia is often missed or misdiagnosed as a sports injury, labral tear, or muscle strain. If you have persistent hip or groin pain, ask your doctor specifically about HD.'},
+      {h:'How is it diagnosed?',p:'Hip dysplasia is diagnosed through a combination of physical examination and imaging:',ul:['Physical exam: The Barlow and Ortolani maneuvers are used in newborns to detect instability','Ultrasound: The primary imaging tool in infants under 6 months (no radiation)','X-ray: Used in older children and adults to assess the acetabular angle and joint coverage','MRI: Provides detailed soft tissue images and is used to assess labral tears associated with HD','CT scan: Sometimes used to plan complex surgical corrections'],info:'In Texas, Med Impact partners with Texas Children\'s Hospital, Dell Children\'s, and UT Southwestern to provide fast-track HD diagnostic pathways. Book through our platform to access priority screening.'}
+    ]
+  },
+  treatment:{
+    badge:'Treatment',badgeClass:'badge-blue',
+    title:'Treatment options for hip dysplasia',
+    subtitle:'From conservative management to surgery — understanding all your options at every age',
+    sections:[
+      {h:'Treatment depends on age and severity',p:'The right treatment for hip dysplasia varies significantly based on the patient\'s age, the severity of the dysplasia, and whether arthritis has already developed. The goal of all treatments is to stabilize the hip joint, relieve pain, and prevent the progression to early arthritis.',info:'Early treatment almost always leads to better outcomes. The sooner HD is identified, the less invasive the treatment options.'},
+      {h:'Newborns and infants (0–6 months)',p:'In this age group, the hip joint is still largely cartilaginous and very responsive to treatment:',ul:['Pavlik harness: A soft brace worn 23 hours a day that holds the hips in a flexed, abducted position. Highly effective when started early — success rates exceed 90%','Abduction splinting: Similar to the Pavlik harness but used for slightly older infants','Closed reduction: A procedure performed under anesthesia to reposition the femoral head into the socket, followed by a hip spica cast']},
+      {h:'Children (1–8 years)',p:'As the child grows, treatment becomes more involved:',ul:['Open reduction: Surgical repositioning of the femoral head when closed reduction is not possible','Femoral osteotomy: Reshaping of the femur to improve joint alignment','Acetabular osteotomy: Reshaping of the hip socket to improve coverage of the femoral head','Hip spica casting: A full-body cast from chest to toes worn for several months post-surgery']},
+      {h:'Adolescents and adults',p:'For older patients, treatment focuses on pain relief and preventing or delaying arthritis:',ul:['Physiotherapy: Strengthening the muscles around the hip to improve stability and reduce pain. Best for mild to moderate HD without significant joint damage','Periacetabular Osteotomy (PAO): The gold-standard surgery for adults with significant dysplasia and preserved joint cartilage. The socket is reshaped to provide better femoral head coverage','Hip arthroscopy: A minimally invasive procedure to repair labral tears and smooth damaged cartilage, often used alongside PAO','Total hip replacement (THR): For patients with advanced arthritis secondary to HD. Typically the last resort when other options have been exhausted'],warn:'Not all patients with hip dysplasia require surgery. Many people manage well with physiotherapy, lifestyle modifications, and pain management. Discuss all options thoroughly with a specialist before deciding.'},
+      {h:'Recovery and rehabilitation',p:'Recovery timelines vary significantly by procedure:',ul:['Pavlik harness: Worn for approximately 6–12 weeks. No anaesthesia or surgery required','PAO surgery: Partial weight bearing for 6–8 weeks, full recovery typically 9–12 months. Most patients return to normal activity including sport','Total hip replacement: Full weight bearing often within days, return to most activities within 3–6 months'],info:'Med Impact\'s symptom tracker is designed to help you monitor your recovery and share progress with your care team between appointments.'}
+    ]
+  },
+  exercise:{
+    badge:'Exercise',badgeClass:'badge-green',
+    title:'Safe exercise guide for hip dysplasia',
+    subtitle:'The right exercises can significantly reduce pain and improve stability — here\'s what to do and what to avoid',
+    sections:[
+      {h:'Why exercise matters',p:'Strengthening the muscles surrounding the hip joint — particularly the hip abductors, external rotators, and core — reduces the mechanical load on the joint and improves stability. For many patients with mild to moderate HD, a targeted exercise program can significantly reduce pain and delay or avoid surgery.',warn:'Always consult your physiotherapist or orthopedic specialist before beginning a new exercise program. Some exercises that are safe for most people can worsen HD symptoms.'},
+      {h:'Best exercises for hip dysplasia',p:'The following exercises are generally safe and beneficial for most HD patients:',ul:['Clamshells: Strengthens the hip abductors and external rotators. Lie on your side with knees bent and slowly raise your top knee like a clamshell opening','Side-lying hip abduction: Lie on your side and raise your top leg 30–40 degrees. Builds gluteus medius strength','Bridges / glute bridges: Lying on your back, feet flat on floor — raise your hips. Strengthens glutes and core without overloading the joint','Water aerobics / hydrotherapy: The buoyancy of water reduces joint load while allowing full range of motion exercise. Highly recommended for HD patients','Cycling (stationary): Low-impact cardiovascular exercise that strengthens the quads and hip flexors without high joint stress','Swimming: Excellent full-body exercise with minimal joint impact. The breaststroke kick should be avoided as it places stress on the hip in external rotation'],info:'Physiotherapy led by a specialist experienced in HD is the most effective approach. Med Impact\'s Find Care section includes physiotherapists specializing in hip conditions across Texas.'},
+      {h:'Exercises to avoid',p:'Some activities can worsen HD symptoms by placing excessive stress on an unstable joint:',ul:['High-impact running and jumping: Compressive forces during landing can accelerate joint damage in dysplastic hips','Deep squats: Increases joint reaction forces at extreme range of motion','Breaststroke swimming kick: Places hip in a position of external rotation and abduction under load','Yoga poses with extreme hip external rotation: Pigeon pose, lotus, and similar poses can be problematic','Competitive sports with pivoting/cutting: Football, basketball, soccer — discuss with your specialist before continuing'],warn:'This is not a complete list. What you can safely do depends on your specific severity of dysplasia, age, and fitness level. Always get personalized guidance from a physiotherapist.'},
+      {h:'Tips for exercising with hip dysplasia',p:'',ul:['Warm up thoroughly before exercise — 10 minutes of gentle walking or cycling','Start with low resistance and low repetitions, gradually building over weeks','Use pain as your guide — discomfort that persists more than 24 hours after exercise means you pushed too hard','Ice the hip for 15–20 minutes after exercise if inflamed','Maintain a healthy body weight — every extra pound adds several pounds of force across the hip joint','Wear supportive footwear with adequate cushioning']}
+    ]
+  },
+  living:{
+    badge:'Lifestyle',badgeClass:'badge-blue',
+    title:'Living with hip dysplasia every day',
+    subtitle:'Practical strategies for managing work, travel, relationships, and daily life with HD',
+    sections:[
+      {h:'Managing daily pain',p:'Living with hip dysplasia often means managing a condition that fluctuates day to day. Understanding your personal triggers and building a management toolkit can significantly improve quality of life:',ul:['Heat therapy: Warm baths or heat packs before activity can loosen the joint and reduce stiffness','Ice therapy: Ice packs after activity reduce inflammation — 15–20 minutes, never directly on skin','Pacing: Alternating periods of activity and rest prevents flare-ups from overdoing it on good days','Footwear: Supportive shoes with good arch support and cushioning reduce impact on the hip','Ergonomic seating: A chair with good lumbar support and armrests reduces hip load during seated work'],info:'Keeping a symptom log using Med Impact\'s tracker helps you identify personal triggers — weather changes, specific activities, stress — that worsen your HD.'},
+      {h:'Work and career',p:'Many people with HD work full-time in demanding jobs. Some adjustments that can help:',ul:['Sit-stand desks: Alternating between sitting and standing reduces sustained hip loading','Request reasonable adjustments: Under the Americans with Disabilities Act (ADA), employers must make reasonable accommodations for chronic conditions','Frequent short breaks: Standing and walking for 2 minutes every 30–45 minutes improves circulation and reduces stiffness','Supportive chair or cushion: A coccyx cushion or ergonomic seat can redistribute weight away from the hip','Avoid prolonged sitting or standing in one position — movement keeps synovial fluid circulating']},
+      {h:'Travel with hip dysplasia',p:'Long journeys can be particularly challenging for HD patients:',ul:['Request bulkhead or aisle seats on flights — more legroom and easier to stand','Compression socks help prevent DVT, a risk increased by reduced mobility','Move every hour minimum — set a reminder on long flights or drives','Pack a small pillow or rolled towel to support the lumbar curve during travel','Ice packs or heat packs in carry-on luggage can help manage in-flight pain','Arrive early at airports to reduce rushed walking with baggage'],warn:'Long-haul flights and car journeys significantly increase DVT risk for anyone with reduced hip mobility. Discuss this with your doctor if you travel frequently.'},
+      {h:'Relationships and mental health',p:'Living with a chronic condition affects every aspect of life, including relationships and mental wellbeing:',ul:['Communicate openly with partners and family about your limitations and needs','Join a hip dysplasia support community — many Texans find peer support invaluable','Fatigue is a common but underacknowledged symptom of chronic pain — it\'s real and valid','Consider speaking with a psychologist experienced in chronic pain management','Texas-specific resources include the Lone Star HD Support Network and HD support groups at major Texas hospital systems'],info:'You are not alone. Over 2 million Texans are estimated to live with hip dysplasia. The Med Impact community connects you with others navigating the same journey.'}
+    ]
+  },
+  children:{
+    badge:'Children',badgeClass:'badge-green',
+    title:'Hip dysplasia in newborns and children',
+    subtitle:'Early detection is the single most important factor in treatment success for developmental dysplasia of the hip (DDH)',
+    sections:[
+      {h:'What is DDH?',p:'Developmental Dysplasia of the Hip (DDH) is the medical term for hip dysplasia that develops before or around the time of birth. It is one of the most common musculoskeletal conditions in newborns, affecting approximately 1–3 per 1,000 births with clinically significant instability, and up to 10–20 per 1,000 with milder forms.',info:'DDH detected in the first few weeks of life can almost always be treated without surgery using a simple soft brace. Late-diagnosed DDH often requires major surgery. This is why newborn screening is so critical.'},
+      {h:'Risk factors in newborns',p:'Some newborns are at higher risk and warrant targeted screening:',ul:['Female sex: Girls are 4–8 times more likely to have DDH','Breech position: Hip dysplasia is 10 times more common in breech babies','Family history: First-degree relative with DDH increases risk 6-fold','First-born children: Higher uterine tone restricts fetal movement','Oligohydramnios: Low amniotic fluid limits fetal movement in the womb','Multiple births: Reduced space in uterus']},
+      {h:'Newborn screening in Texas',p:'In Texas, newborn hip screening follows the American Academy of Pediatrics (AAP) guidelines:',ul:['Clinical examination at birth: Ortolani and Barlow maneuvers by a trained clinician','Ultrasound at 6 weeks: All infants with risk factors should receive hip ultrasound at 4–6 weeks','Ultrasound at 2–4 months: For borderline cases detected at 6 weeks','X-ray after 4–6 months: Once the femoral head has ossified enough to be visible on X-ray'],info:'Texas Children\'s Hospital and Dell Children\'s Medical Center offer dedicated DDH screening clinics. Med Impact partners with these networks to help families access screening promptly.'},
+      {h:'Treatment by age',p:'The earlier DDH is treated, the simpler and more effective the treatment:',ul:['0–6 months: Pavlik harness — a soft brace worn 23 hours/day for 6–12 weeks. Success rate >90% when started in first 3 months','6–18 months: Closed reduction under general anaesthesia, followed by hip spica cast for 3 months','18 months – 3 years: Open surgical reduction often required, with possible bone reshaping (osteotomy)','3–8 years: More complex surgical correction, longer recovery','Adolescents/Adults: PAO surgery, with results less predictable than in younger patients'],warn:'Untreated DDH leads to severe arthritis, pain, and disability by early adulthood. If you have any concerns about your child\'s hips — asymmetric folds, leg length difference, unusual gait — see a pediatric orthopedic specialist promptly.'},
+      {h:'What to expect as a parent',p:'A DDH diagnosis can feel overwhelming. Here is what to expect:',ul:['The Pavlik harness is very well tolerated by infants — they adjust quickly','Regular ultrasound or X-ray monitoring will track progress','Most children treated early go on to live completely normal lives with no lasting hip problems','Some children require more than one round of treatment — this does not mean failure','Texas Children\'s Hospital and Dell Children\'s offer family support resources and parent education programs']}
+    ]
+  },
+  pao:{
+    badge:'Surgery',badgeClass:'badge-blue',
+    title:'PAO surgery explained',
+    subtitle:'Periacetabular Osteotomy (PAO) is the gold-standard treatment for adult hip dysplasia — here\'s everything you need to know',
+    sections:[
+      {h:'What is PAO surgery?',p:'Periacetabular Osteotomy (PAO) is a surgical procedure in which the hip socket (acetabulum) is cut from the pelvis and repositioned to provide better coverage of the femoral head. It is the most effective treatment for adults with significant hip dysplasia who still have healthy joint cartilage.',info:'PAO preserves your own hip joint — it is not a hip replacement. The goal is to restore normal hip mechanics, relieve pain, and delay or prevent the need for total hip replacement, potentially for decades.'},
+      {h:'Who is a candidate for PAO?',p:'PAO is typically recommended for:',ul:['Adults aged 15–40 (occasionally older) with symptomatic hip dysplasia','Patients with significant dysplasia confirmed on X-ray (low lateral center-edge angle, high acetabular index)','Those with joint pain that has not responded adequately to physiotherapy and conservative management','Patients with well-preserved joint cartilage (no or minimal arthritis)','Those willing to commit to a 9–12 month recovery process'],warn:'PAO is not appropriate for all HD patients. Those with advanced arthritis, poor bone quality, or other complicating conditions may not be candidates. A thorough assessment by an experienced PAO surgeon is essential.'},
+      {h:'What happens during surgery?',p:'PAO surgery typically takes 2–4 hours under general anaesthesia:',ul:['Three or four cuts are made in the bones surrounding the acetabulum','The socket is rotated to the optimal position — improving femoral head coverage','The repositioned socket is fixed in place with three or four titanium screws','Surgeons may also repair a labral tear at the same time via hip arthroscopy','Hardware (screws) is usually removed in a second minor procedure 12–18 months later in some centres'],info:'PAO surgery requires a highly experienced surgeon. In Texas, Med Impact has identified surgeons at UT Southwestern, Houston Methodist, and University Health San Antonio with extensive PAO experience. Book through our platform for priority access.'},
+      {h:'Recovery timeline',p:'PAO recovery is significant — planning is essential:',ul:['Days 1–3: Hospital stay. Pain managed with medication. Physiotherapy begins on day 1','Weeks 1–6: Partial weight bearing with crutches. Mobility is limited. Significant assistance required at home','Weeks 6–12: Progressive weight bearing begins as bone healing is confirmed on X-ray. Physiotherapy intensifies','Months 3–6: Most patients return to desk work. Driving resumes around 8–12 weeks','Months 6–9: Return to exercise and light physical activity. Pain should be minimal by this stage','Months 9–12: Return to sport and full activity for most patients. Full recovery achieved'],warn:'PAO recovery is a marathon, not a sprint. Underestimating the recovery time is the most common mistake patients make. Arrange adequate home support, especially for the first 6 weeks.'},
+      {h:'Expected outcomes',p:'PAO surgery has excellent outcomes when performed by an experienced surgeon on the right patient:',ul:['85–90% of patients report significant pain reduction','Most patients can return to sport, hiking, and physical activity','PAO can delay the need for hip replacement by 20–30 years in many patients','Complications are uncommon but include infection, nerve injury, blood clots, and hardware failure'],info:'The Med Impact research dashboard shows real-world outcomes data from Texas PAO patients in our network. Visit the Research page to see anonymized pain reduction and satisfaction data.'}
+    ]
+  }
+};
+
+function showEduGuide(id){
+  var g=eduGuides[id];
+  if(!g)return;
+  var html='<div class="edu-detail-hero"><div class="badge '+g.badgeClass+'" style="margin-bottom:10px">'+g.badge+'</div><h1 style="font-size:28px;font-weight:800;margin-bottom:8px;line-height:1.2">'+g.title+'</h1><p style="font-size:15px;color:var(--muted);line-height:1.6;max-width:640px">'+g.subtitle+'</p></div>';
+  g.sections.forEach(function(s){
+    html+='<div class="edu-section"><h3>'+s.h+'</h3>';
+    if(s.p)html+='<p>'+s.p+'</p>';
+    if(s.ul){html+='<ul>';s.ul.forEach(function(li){html+='<li>'+li+'</li>';});html+='</ul>';}
+    if(s.info)html+='<div class="info-box" style="margin-top:12px"><p>'+s.info+'</p></div>';
+    if(s.warn)html+='<div class="warn-box" style="margin-top:12px"><p>⚠️ '+s.warn+'</p></div>';
+    html+='</div>';
+  });
+  document.getElementById('edu-detail-content').innerHTML=html;
+  showPage('edu-detail',null,null);
+}
+
+/* ===== BOOKING MODAL ===== */
+var booking={doc:'',sub:'',type:'',date:'',time:'',calYear:2026,calMonth:3};
+function openBooking(doc,sub){
+  booking.doc=doc;booking.sub=sub;booking.type='';booking.date='';booking.time='';
+  booking.calYear=2026;booking.calMonth=3;
+  document.getElementById('modal-doc-name').textContent='Book with '+doc;
+  document.getElementById('modal-doc-sub').textContent=sub;
+  document.querySelectorAll('.visit-opt').forEach(function(o){o.style.borderColor='var(--border)';o.style.background='';});
+  document.getElementById('btn-step1').disabled=true;document.getElementById('btn-step1').style.opacity='0.5';
+  goStep(1);
+  document.getElementById('bookingModal').className='modal-overlay open';
+}
+function closeModal(){document.getElementById('bookingModal').className='modal-overlay';}
+document.getElementById('bookingModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function goStep(n){
+  for(var i=1;i<=5;i++){var el=document.getElementById('book-step'+i);if(el)el.style.display=i===n?'block':'none';}
+  for(var i=1;i<=4;i++){var dot=document.getElementById('sd'+i);if(!dot)continue;dot.className='step-dot'+(i<n?' done':i===n?' active':'');var lbl=dot.nextElementSibling;if(lbl)lbl.className='step-label'+(i===n?' active':'');}
+  if(n===2)renderCal();
+  if(n===3){document.getElementById('step3-date-label').textContent=booking.date;document.querySelectorAll('.time-slot').forEach(function(s){if(!s.classList.contains('unavailable'))s.className='time-slot';});document.getElementById('btn-step3').disabled=true;document.getElementById('btn-step3').style.opacity='0.5';}
+  if(n===4){document.getElementById('conf-doc').textContent=booking.doc;document.getElementById('conf-type').textContent=booking.type;document.getElementById('conf-date').textContent=booking.date;document.getElementById('conf-time').textContent=booking.time;}
+}
+function selectVisit(el,type,sub){
+  document.querySelectorAll('.visit-opt').forEach(function(o){o.style.borderColor='var(--border)';o.style.background='';});
+  el.style.borderColor='var(--green)';el.style.background='#f0fdf8';
+  booking.type=type;
+  document.getElementById('btn-step1').disabled=false;document.getElementById('btn-step1').style.opacity='1';
+}
+var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function getUnavailDays(y,m){
+  var seed=y*100+m;
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  var firstDay=new Date(y,m,1).getDay();
+  var unavail=[];
+  var weekStart=1;
+  while(weekStart<=daysInMonth){
+    var weekDays=[];
+    for(var i=0;i<7;i++){var day=weekStart+i;if(day>=1&&day<=daysInMonth)weekDays.push(day);}
+    if(weekDays.length>0){
+      seed=(seed*1664525+1013904223)&0x7fffffff;
+      var pick=weekDays[seed%weekDays.length];
+      unavail.push(pick);
+    }
+    weekStart+=7;
+  }
+  return unavail;
+}
+function renderCal(){
+  var y=booking.calYear,m=booking.calMonth;
+  var today=new Date(2026,2,17);
+  document.getElementById('cal-title').textContent=months[m]+' '+y;
+  var firstDay=new Date(y,m,1).getDay();
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  var unavail=getUnavailDays(y,m);
+  var html='';
+  for(var i=0;i<firstDay;i++)html+='<button class="cal-day empty"></button>';
+  for(var d=1;d<=daysInMonth;d++){
+    var isPast=new Date(y,m,d)<today;
+    var isUnavail=unavail.indexOf(d)>-1;
+    var isDisabled=isPast||isUnavail;
+    var isSel=booking.date===months[m]+' '+d+', '+y;
+    var cls='cal-day'+(isDisabled?' disabled':isSel?' selected':'');
+    var oc=isDisabled?'':'onclick="selectDay('+d+',\''+months[m]+' '+d+', '+y+'\')"';
+    var style=isUnavail&&!isPast?'style="background:#f3f4f6;color:#d1d5db;"':'';
+    html+='<button class="'+cls+'" '+oc+' '+style+'>'+d+'</button>';
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+}
+function changeMonth(dir){booking.calMonth+=dir;if(booking.calMonth>11){booking.calMonth=0;booking.calYear++;}if(booking.calMonth<0){booking.calMonth=11;booking.calYear--;}renderCal();}
+function selectDay(d,label){booking.date=label;document.querySelectorAll('.cal-day').forEach(function(b){b.className=b.className.replace(' selected','');});event.target.className+=' selected';document.getElementById('btn-step2').disabled=false;document.getElementById('btn-step2').style.opacity='1';}
+function selectTime(el,t){document.querySelectorAll('.time-slot').forEach(function(s){if(!s.classList.contains('unavailable'))s.className='time-slot';});el.className='time-slot selected';booking.time=t;document.getElementById('btn-step3').disabled=false;document.getElementById('btn-step3').style.opacity='1';}
+function confirmBooking(){
+  goStep(5);
+  document.getElementById('conf-success-msg').textContent='Your '+booking.type.toLowerCase()+' with '+booking.doc+' is booked for '+booking.date+' at '+booking.time+'.';
+  var el=document.createElement('div');el.className='appt-card';
+  var parts=booking.date.split(' ');var day=parts[1].replace(',','');var mon=parts[0].substring(0,3).toUpperCase();
+  el.innerHTML='<div class="appt-date-box"><div class="day">'+day+'</div><div class="mon">'+mon+'</div></div><div style="flex:1"><div style="font-size:14px;font-weight:600">'+booking.doc+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px">'+booking.type+' · '+booking.time+'</div><div style="font-size:12px;color:var(--muted)">'+booking.sub+'</div></div><div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0"><span class="badge badge-green">Confirmed</span><button class="btn btn-outline" style="font-size:12px;padding:5px 10px">Reschedule</button></div>';
+  document.getElementById('appt-list').insertBefore(el,document.getElementById('appt-list').firstChild);
+}
+
+/* ===== DIAGNOSIS QUIZ ===== */
+var diagQuestions=[
+  {id:'pain',q:'Where do you feel pain or discomfort?',opts:['Groin / front of hip','Outer hip / side','Buttock / back of hip','Knee or thigh (referred pain)','No pain — other concern']},
+  {id:'when',q:'When does the pain typically occur?',opts:['Only after intense exercise','During everyday activities (walking, stairs)','At rest or at night','Constantly throughout the day','Comes and goes unpredictably']},
+  {id:'age',q:'What is your age group?',opts:['Under 1 year (infant)','1–12 years (child)','13–17 years (teen)','18–35 years','36–55 years','Over 55 years']},
+  {id:'duration',q:'How long have you had these symptoms?',opts:['Less than 3 months','3–12 months','1–3 years','More than 3 years','Diagnosed since birth / childhood']},
+  {id:'mobility',q:'How does hip dysplasia affect your mobility?',opts:['No mobility issues yet','Slight limp or stiffness in the morning','Difficulty with stairs, inclines, or prolonged walking','Significantly limited — struggle with daily tasks','Using a walking aid or wheelchair support']},
+  {id:'history',q:'Do you have any relevant history?',opts:['Breech birth position','Family history of hip dysplasia','Previously diagnosed with DDH as a child','No relevant history','Not sure']}
+];
+var diagAnswers={};
+var diagStep=0;
+
+function diagRender(){
+  var q=diagQuestions[diagStep];
+  var pct=Math.round(((diagStep+1)/diagQuestions.length)*100);
+  document.getElementById('diag-prog-bar').style.width=pct+'%';
+  document.getElementById('diag-prog-label').textContent='Step '+(diagStep+1)+' of '+diagQuestions.length;
+  var html='<div style="font-size:16px;font-weight:600;margin-bottom:1.25rem;line-height:1.4">'+q.q+'</div><div style="display:flex;flex-direction:column;gap:8px">';
+  q.opts.forEach(function(o,i){
+    var sel=diagAnswers[q.id]===o;
+    html+='<button onclick="diagSelect(\''+q.id+'\',this)" data-val="'+o+'" style="text-align:left;padding:12px 16px;border:1.5px solid '+(sel?'var(--green)':'var(--border)')+';border-radius:10px;background:'+(sel?'#f0fdf8':'#fff')+';cursor:pointer;font-size:13px;font-family:inherit;color:#374151;transition:all 0.15s">'+o+'</button>';
+  });
+  html+='</div>';
+  document.getElementById('diag-question-area').innerHTML=html;
+  var nb=document.getElementById('diag-next-btn');
+  var bb=document.getElementById('diag-back-btn');
+  if(diagAnswers[q.id]){nb.disabled=false;nb.style.opacity='1';}else{nb.disabled=true;nb.style.opacity='0.5';}
+  bb.style.display=diagStep>0?'block':'none';
+  nb.textContent=diagStep===diagQuestions.length-1?'See results →':'Next →';
+}
+
+function diagSelect(id,btn){
+  diagAnswers[id]=btn.getAttribute('data-val');
+  document.querySelectorAll('#diag-question-area button').forEach(function(b){
+    var sel=b.getAttribute('data-val')===diagAnswers[id];
+    b.style.border='1.5px solid '+(sel?'var(--green)':'var(--border)');
+    b.style.background=sel?'#f0fdf8':'#fff';
+  });
+  var nb=document.getElementById('diag-next-btn');nb.disabled=false;nb.style.opacity='1';
+}
+
+function diagNext(){
+  if(diagStep<diagQuestions.length-1){diagStep++;diagRender();}
+  else{diagShowResult();}
+}
+function diagBack(){if(diagStep>0){diagStep--;diagRender();}}
+function diagReset(){diagAnswers={};diagStep=0;document.getElementById('diag-quiz').style.display='block';document.getElementById('diag-result').style.display='none';diagRender();}
+
+function diagShowResult(){
+  document.getElementById('diag-quiz').style.display='none';
+  document.getElementById('diag-result').style.display='block';
+  var age=diagAnswers['age']||'';
+  var pain=diagAnswers['pain']||'';
+  var mob=diagAnswers['mobility']||'';
+  var dur=diagAnswers['duration']||'';
+  var isInfant=age.indexOf('infant')>-1||age.indexOf('Under 1')>-1;
+  var isChild=age.indexOf('child')>-1||age.indexOf('1–12')>-1;
+  var isTeen=age.indexOf('teen')>-1||age.indexOf('13–17')>-1;
+  var isAdult=age.indexOf('18–35')>-1||age.indexOf('36–55')>-1||age.indexOf('Over 55')>-1;
+  var severeSymp=mob.indexOf('Significantly')>-1||mob.indexOf('walking aid')>-1;
+  var mildSymp=mob.indexOf('No mobility')>-1||mob.indexOf('Slight')>-1;
+  var longTerm=dur.indexOf('1–3')>-1||dur.indexOf('More than')>-1||dur.indexOf('childhood')>-1;
+  var level=severeSymp?'Moderate to severe':mildSymp&&!longTerm?'Mild':'Moderate';
+  var color=severeSymp?'#D85A30':mildSymp&&!longTerm?'#1D9E75':'#378ADD';
+  var bgColor=severeSymp?'#FAECE7':mildSymp&&!longTerm?'#E1F5EE':'#E6F1FB';
+  var nextSteps='';
+  if(isInfant)nextSteps='<li>Seek urgent pediatric orthopedic assessment — DDH is highly treatable in infancy</li><li>Ultrasound hip screening (standard for infants under 6 months)</li><li>If confirmed, Pavlik harness treatment has a 90%+ success rate when started early</li>';
+  else if(isChild)nextSteps='<li>Refer to a pediatric orthopedic specialist experienced in DDH</li><li>X-ray of the hip to assess acetabular coverage</li><li>Treatment options depend on severity — may include casting, osteotomy, or physiotherapy</li>';
+  else if(isTeen)nextSteps='<li>AP pelvis X-ray to measure lateral center-edge angle and assess dysplasia severity</li><li>MRI to check for labral tears or cartilage damage</li><li>Physiotherapy to manage symptoms while planning further assessment</li><li>If moderate/severe, referral to a PAO-specialist surgeon for assessment</li>';
+  else nextSteps='<li>AP pelvis X-ray as first step — request this from your GP specifically mentioning hip dysplasia</li><li>MRI if labral tear is suspected based on symptoms</li><li>Physiotherapy to strengthen hip musculature and manage pain while awaiting assessment</li>'+(severeSymp?'<li>Referral to a PAO specialist — surgical assessment is recommended given symptom severity</li>':'<li>Conservative management (physio + lifestyle) may be effective if cartilage is well preserved</li>');
+  var html='<div style="background:'+bgColor+';border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;border-left:4px solid '+color+'">'
+    +'<div style="font-size:12px;font-weight:600;color:'+color+';margin-bottom:4px">ASSESSMENT RESULT</div>'
+    +'<div style="font-size:20px;font-weight:700;margin-bottom:6px">Possible '+level+' Hip Dysplasia</div>'
+    +'<p style="font-size:13px;color:#374151;line-height:1.6;margin:0">Based on your answers, your symptoms are consistent with '+level.toLowerCase()+' hip dysplasia. This is a screening tool only — a confirmed diagnosis requires imaging and examination by a qualified specialist.</p>'
+    +'</div>'
+    +'<div class="card" style="margin-bottom:1.25rem"><div style="font-size:14px;font-weight:600;margin-bottom:1rem">Recommended next steps</div><ol style="padding-left:1.25rem">'+nextSteps+'</ol></div>'
+    +'<div style="background:#FAEEDA;border-left:3px solid #BA7517;border-radius:0 8px 8px 0;padding:1rem 1.25rem"><p style="font-size:13px;color:#633806;line-height:1.6;margin:0">⚠️ This assessment is for informational purposes only and does not constitute a medical diagnosis. Always consult a qualified healthcare professional.</p></div>';
+  document.getElementById('diag-result-content').innerHTML=html;
+  window.scrollTo(0,0);
+}
+
+/* ===== TREATMENT PLAN BUILDER ===== */
+var treatmentPlans={
+  'infant-mild':   {title:'Conservative monitoring',color:'#1D9E75',bg:'#E1F5EE',steps:['Regular hip ultrasound every 6–8 weeks to monitor development','Ensure wide-leg swaddling — tight swaddling can worsen mild dysplasia','Reassess at 6 months with X-ray once femoral head has ossified','Most mild infant cases resolve naturally with monitoring alone']},
+  'infant-moderate':{title:'Pavlik harness treatment',color:'#378ADD',bg:'#E6F1FB',steps:['Pavlik harness fitted by a pediatric orthopedic specialist','Worn 23 hours per day for 6–12 weeks','Ultrasound checks every 2–3 weeks to monitor progress','If harness fails after 3–4 weeks, reassess for closed reduction under anaesthesia']},
+  'infant-severe': {title:'Urgent pediatric intervention',color:'#D85A30',bg:'#FAECE7',steps:['Urgent referral to pediatric orthopedic surgeon','Pavlik harness as first attempt — if unsuccessful within 3 weeks, proceed to closed reduction','Closed reduction under general anaesthesia + hip spica cast for 3 months','Surgical open reduction if closed reduction fails']},
+  'child-mild':    {title:'Monitoring and physiotherapy',color:'#1D9E75',bg:'#E1F5EE',steps:['6-monthly X-ray review to monitor acetabular development','Physiotherapy to strengthen hip musculature','Activity monitoring — avoid high-impact sport if symptomatic','May require osteotomy if socket fails to develop adequately by age 8']},
+  'child-moderate':{title:'Osteotomy assessment',color:'#378ADD',bg:'#E6F1FB',steps:['Full orthopedic assessment with AP pelvis X-ray and CT','Salter or Pemberton osteotomy to reshape the acetabulum if indicated','Post-surgical hip spica casting for 6–8 weeks','Intensive physiotherapy rehabilitation over 6–12 months']},
+  'child-severe':  {title:'Surgical correction',color:'#D85A30',bg:'#FAECE7',steps:['Urgent surgical assessment — severity increases surgical complexity as child grows','Open reduction with femoral and/or pelvic osteotomy','Hip spica cast post-operatively','12+ months rehabilitation with specialist pediatric physiotherapy']},
+  'teen-mild':     {title:'Physiotherapy first-line',color:'#1D9E75',bg:'#E1F5EE',steps:['Structured physiotherapy program targeting hip abductors, external rotators, core','Activity modification — avoid high-impact sport during flare-ups','6-monthly review with orthopedic specialist','AP pelvis X-ray to establish baseline and monitor any progression']},
+  'teen-moderate': {title:'Specialist assessment + possible PAO',color:'#378ADD',bg:'#E6F1FB',steps:['Referral to a PAO-specialist orthopedic surgeon','AP pelvis X-ray and MRI to assess severity and labral integrity','Physiotherapy to manage symptoms pre-assessment','PAO surgery is often recommended for teens with moderate dysplasia — results are excellent at this age']},
+  'teen-severe':   {title:'PAO surgery recommended',color:'#D85A30',bg:'#FAECE7',steps:['Prompt referral to PAO specialist — teens have excellent surgical outcomes','AP pelvis X-ray + MRI + 3D CT for surgical planning','Physiotherapy in the pre-operative period','PAO surgery with or without concurrent hip arthroscopy for labral repair','9–12 months rehabilitation post-surgery']},
+  'young-mild':    {title:'Conservative management',color:'#1D9E75',bg:'#E1F5EE',steps:['Physiotherapy program focused on hip stabiliser strengthening','Activity modification — low-impact exercise (swimming, cycling)','Pain management with NSAIDs as needed','Annual review with orthopedic specialist — monitor for progression','Consider PAO assessment if symptoms worsen or imaging shows deterioration']},
+  'young-moderate':{title:'PAO surgical assessment',color:'#378ADD',bg:'#E6F1FB',steps:['Referral to PAO-specialist surgeon at UT Southwestern, Houston Methodist, or similar centre','AP pelvis X-ray + MRI to confirm diagnosis and assess cartilage','Pre-operative physiotherapy to optimise hip strength','PAO surgery — gold standard for this age group with 85–90% success rate','9–12 months structured rehabilitation post-surgery']},
+  'young-severe':  {title:'PAO surgery — priority referral',color:'#D85A30',bg:'#FAECE7',steps:['Priority referral to experienced PAO surgeon','Full imaging workup: AP pelvis X-ray + MRI + 3D CT for planning','Pre-operative physio and pain management','PAO surgery — may be combined with hip arthroscopy for labral repair','12 months structured post-operative rehabilitation programme']},
+  'adult-mild':    {title:'Conservative management',color:'#1D9E75',bg:'#E1F5EE',steps:['Physiotherapy focusing on hip abductor and core strengthening','Lifestyle modifications — weight management, low-impact activity','Pain management: NSAIDs, heat/ice therapy','Annual orthopedic review to monitor for arthritic change','PAO may still be an option if cartilage is well preserved and symptoms significantly affect quality of life']},
+  'adult-moderate':{title:'PAO or conservative — specialist decision',color:'#378ADD',bg:'#E6F1FB',steps:['Orthopedic assessment — X-ray + MRI to assess cartilage health','If cartilage is preserved: PAO surgery may be offered (best results under 45)','If early arthritis: combination of physio, injections, and activity modification','Pain management plan with GP','Discuss surgical vs conservative trade-offs in detail with your specialist']},
+  'adult-severe':  {title:'Surgical intervention likely needed',color:'#D85A30',bg:'#FAECE7',steps:['Full orthopedic assessment — if cartilage preserved, PAO may still be possible up to mid-40s','If significant arthritis is present, total hip replacement (THR) assessment','Pain management in the interim — physiotherapy, NSAIDs, corticosteroid injections','THR if arthritis is advanced — modern implants last 20–25 years','Post-surgical physiotherapy critical for best outcomes']},
+  'older-mild':    {title:'Conservative management',color:'#1D9E75',bg:'#E1F5EE',steps:['Physiotherapy and hydrotherapy for pain management and mobility','Activity modification — swimming, cycling, walking on soft surfaces','Pain management: NSAIDs (with GI protection), acetaminophen, topical agents','Weight management to reduce joint load','Regular orthopedic monitoring']},
+  'older-moderate':{title:'Conservative or THR assessment',color:'#378ADD',bg:'#E6F1FB',steps:['Orthopedic review — assess degree of arthritic change on X-ray','Physiotherapy and pain management as primary approach','Corticosteroid or hyaluronic acid injections may provide interim relief','THR assessment if symptoms significantly affect quality of life']},
+  'older-severe':  {title:'Total hip replacement assessment',color:'#D85A30',bg:'#FAECE7',steps:['Referral to hip replacement specialist','Pre-operative assessment including cardiac, anaesthetic, and mobility review','Total hip replacement — excellent outcomes in this age group with significant pain relief','Post-operative physiotherapy: mobility restoration over 3–6 months','Ensure home environment is safe for post-operative recovery']}
+};
+
+function buildPlan(){
+  var age=document.getElementById('tp-age').value;
+  var sev=document.getElementById('tp-severity').value;
+  var goal=document.getElementById('tp-goal').value;
+  if(!age||!sev){document.getElementById('tp-prompt').style.display='block';document.getElementById('tp-result').style.display='none';return;}
+  var ageKey=age==='infant'?'infant':age==='child'?'child':age==='teen'?'teen':age==='young'?'young':age==='adult'?'adult':'older';
+  var key=ageKey+'-'+sev;
+  var plan=treatmentPlans[key];
+  if(!plan){document.getElementById('tp-prompt').style.display='block';document.getElementById('tp-result').style.display='none';return;}
+  document.getElementById('tp-prompt').style.display='none';
+  document.getElementById('tp-result').style.display='block';
+  var goalNote='';
+  if(goal==='active')goalNote='<div style="background:#E6F1FB;border-left:3px solid #378ADD;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:1rem"><p style="font-size:13px;color:#0C447C;margin:0">Your goal is to stay active / return to sport. Physiotherapy and early surgical intervention (where appropriate) give the best long-term athletic outcomes.</p></div>';
+  else if(goal==='longterm')goalNote='<div style="background:#E1F5EE;border-left:3px solid #1D9E75;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:1rem"><p style="font-size:13px;color:#085041;margin:0">Your goal is long-term joint preservation. PAO surgery (where appropriate) can delay hip replacement by 20–30 years compared to no treatment.</p></div>';
+  else if(goal==='surgery')goalNote='<div style="background:#FAEEDA;border-left:3px solid #BA7517;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:1rem"><p style="font-size:13px;color:#633806;margin:0">You\'re exploring surgical options. The steps below outline the recommended pathway to surgical assessment and treatment.</p></div>';
+  var stepsHtml=plan.steps.map(function(s,i){return '<div style="display:flex;gap:12px;align-items:start;padding:10px 0;border-bottom:1px solid #f3f4f6"><div style="width:24px;height:24px;border-radius:50%;background:'+plan.color+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">'+(i+1)+'</div><div style="font-size:13px;color:#374151;line-height:1.6;padding-top:2px">'+s+'</div></div>';}).join('');
+  var html='<div style="background:'+plan.bg+';border-radius:14px;padding:1.25rem;margin-bottom:1.25rem;border-left:4px solid '+plan.color+'">'
+    +'<div style="font-size:11px;font-weight:700;color:'+plan.color+';margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Recommended pathway</div>'
+    +'<div style="font-size:18px;font-weight:700;color:#1a1a1a">'+plan.title+'</div>'
+    +'</div>'
+    +goalNote
+    +'<div class="card" style="margin-bottom:1.25rem"><div style="font-size:14px;font-weight:600;margin-bottom:0.5rem">Your treatment steps</div>'+stepsHtml+'</div>'
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+    +'<button class="btn btn-green" onclick="showPage(\'doctors\',null,\'mob-doctors\')">Find a Texas specialist</button>'
+    +'<button class="btn btn-outline" onclick="showPage(\'appointments\',null,\'mob-appointments\')">Book appointment</button>'
+    +'</div>';
+  document.getElementById('tp-result-content').innerHTML=html;
+}
+
+/* ===== CHARTS ===== */
+var chartsInit=false;
+function initCharts(){
+  if(chartsInit)return;chartsInit=true;
+  Chart.defaults.font.family='-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';Chart.defaults.font.size=11;
+  new Chart(document.getElementById('chart-pain'),{type:'line',data:{labels:['Month 1','Month 3','Month 6','Month 9','Month 12'],datasets:[{label:'Physiotherapy',data:[7.2,6.1,5.3,4.8,4.2],borderColor:'#1D9E75',tension:0.4,fill:false,borderWidth:2,pointRadius:3},{label:'PAO surgery',data:[8.1,7.5,5.2,3.8,2.9],borderColor:'#378ADD',tension:0.4,fill:false,borderWidth:2,pointRadius:3},{label:'No treatment',data:[6.8,7.1,7.3,7.6,8.0],borderColor:'#D85A30',tension:0.4,fill:false,borderWidth:2,pointRadius:3}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10}}},scales:{y:{min:0,max:10,title:{display:true,text:'Pain (0–10)'}}}}});
+  new Chart(document.getElementById('chart-outcomes'),{type:'doughnut',data:{labels:['Major improvement','Moderate improvement','No change','Worsened'],datasets:[{data:[54,31,10,5],backgroundColor:['#1D9E75','#9FE1CB','#D3D1C7','#F09595'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10}}}}});
+  new Chart(document.getElementById('chart-age'),{type:'bar',data:{labels:['0–5','6–12','13–18','19–25','26–35','36–50','51–65','65+'],datasets:[{label:'% of patients',data:[18,9,14,22,19,11,5,2],backgroundColor:'#9FE1CB',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'% of patients'}}}}});
+}
+</script>
+</body>
+</html>
